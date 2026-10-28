@@ -44,7 +44,7 @@ button,input{font:inherit;color:inherit}
 .search input::placeholder{color:#717171;font-weight:400}
 .search input::-webkit-search-cancel-button{display:none}
 .search>svg{width:18px;height:18px;color:var(--ink);flex:none}
-.clear{border:0;background:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+.clear{-webkit-appearance:none;appearance:none;padding:0;line-height:0;border:0;background:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
 .clear[hidden]{display:none}
 
 /* floating pill buttons */
@@ -66,8 +66,8 @@ body.full .sheet{border-radius:0}
 .head h2{margin:0;font-size:24px;line-height:34px;font-weight:300;letter-spacing:-.01em}
 .head h2::after{content:"";display:block;width:28px;height:2px;background:var(--gold);margin:6px 0 4px;border-radius:2px}
 .head p{margin:1px 0 0;color:var(--muted);font-size:14px}
-.x{border:0;background:#fff;box-shadow:0 6px 16px rgba(11,40,25,.12);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;cursor:pointer;flex:none}
-.x svg{width:16px;height:16px}
+.x{-webkit-appearance:none;appearance:none;padding:0;margin:0;line-height:0;border:0;background:#fff;box-shadow:0 6px 16px rgba(11,40,25,.12);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;cursor:pointer;flex:none}
+.x svg{width:16px;height:16px;display:block}
 .list{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;margin:0;padding:0 0 calc(90px + env(safe-area-inset-bottom));list-style:none}
 .row{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid var(--line);cursor:pointer}
 .row:hover{background:#f7f7f7}
