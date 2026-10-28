@@ -1,5 +1,5 @@
 // Cache the app shell and masjid list so it opens offline; refresh in the background.
-const C="masjids-v9";
+const C="masjids-v10";
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(["./","index.html","masjids.json","manifest.webmanifest","icon.svg"])));self.skipWaiting()});
 self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));
 self.addEventListener("fetch",e=>{

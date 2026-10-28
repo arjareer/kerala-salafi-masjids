@@ -5,91 +5,89 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Kerala Salafi Masjids</title>
 <meta name="description" content="Find Salafi (KNM, Markazudawa, Wisdom) masjids across Kerala on a street map, nearest first, with Google Maps directions.">
-<meta name="theme-color" content="#eceef2">
+<meta name="theme-color" content="#ffffff">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&family=Noto+Sans+Malayalam:wght@500&display=swap">
 <style>
-/* Layout: full-bleed soft-grey street map; a frosted bottom sheet (phone) or floating side panel (desktop)
-   holds filters and the list. Tapping a masjid opens a map popup with directions. */
+/* Layout (Google Maps style): full-screen map with a search bar and one "Near me" button.
+   Near me or a search slides up a list sheet: mini (header only) / half / full screen, or closed. */
 :root{
-  --ink:#111317; --ink-2:#3b3f47; --muted:#7a808b; --line:rgba(17,19,23,.08);
-  --glass:rgba(255,255,255,.78); --card:#ffffff; --bg:#eceef2;
-  --black:#111317; --green:#0f7a58; --green-soft:#e3f3ec;
-  --peach:#ffe6d6; --lilac:#e7e4ff; --sky:#dfeeff;
-  --warm:#ff7a45; --you:#3d6bff;
-  --r-xl:28px; --r-lg:20px; --r-md:14px;
-  --shadow:0 12px 40px rgba(17,19,23,.12),0 2px 8px rgba(17,19,23,.06);
-  --font:"Inter",-apple-system,"SF Pro Text",system-ui,sans-serif;
-  --ml:"Noto Sans Malayalam","Inter",sans-serif;
+  --ink:#222; --muted:#6a6a6a; --line:#ebebeb;
+  --glass:rgba(255,255,255,.92); --bg:#eceef2;
+  --black:#222; --green:#0b6e4f; --warm:#ff7a45; --you:#3d6bff;
+  --r-xl:24px; --r-lg:18px;
+  --shadow:0 6px 20px rgba(0,0,0,.14),0 1px 4px rgba(0,0,0,.08);
+  --font:"Nunito Sans",-apple-system,"SF Pro Text",system-ui,sans-serif;
+  --ml:"Noto Sans Malayalam","Nunito Sans",sans-serif;
+  --top:calc(70px + env(safe-area-inset-top));
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0}
-body{font:15px/1.4 var(--font);color:var(--ink);background:var(--bg);overflow:hidden;-webkit-font-smoothing:antialiased}
-button,input,select{font:inherit;color:inherit}
+body{font:16px/1.4 var(--font);color:var(--ink);background:var(--bg);overflow:hidden;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--you);outline-offset:2px}
 #map{position:fixed;inset:0;background:#e9eaee}
 .leaflet-tile-pane{filter:grayscale(1) brightness(1.1) contrast(.8)}
 .leaflet-control-attribution{font-size:10px;background:rgba(255,255,255,.7)!important;border-radius:8px 0 0 0}
 .leaflet-control-zoom{display:none}
 
-/* floating top bar */
-.top{position:fixed;z-index:500;top:calc(12px + env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));display:flex;gap:10px;align-items:center;pointer-events:none}
-.top>*{pointer-events:auto}
-.round{width:46px;height:46px;flex:none;border-radius:50%;border:0;background:var(--glass);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);box-shadow:var(--shadow);display:grid;place-items:center;cursor:pointer}
-.round svg{width:20px;height:20px}
-.search{flex:1;min-width:0;height:46px;border-radius:999px;background:var(--glass);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);box-shadow:var(--shadow);display:flex;align-items:center;gap:8px;padding:0 16px}
-.search input{border:0;background:none;outline:none;flex:1;min-width:0;font-size:16px}
-.search svg{width:18px;height:18px;color:var(--muted);flex:none}
+/* search bar */
+.top{position:fixed;z-index:700;top:calc(12px + env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right))}
+.search{height:50px;border-radius:999px;background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;padding:0 8px 0 18px}
+.search input{border:0;background:none;outline:none;flex:1;min-width:0;font-size:16px;font-weight:600}
+.search input::placeholder{color:#717171;font-weight:400}
+.search input::-webkit-search-cancel-button{display:none}
+.search>svg{width:18px;height:18px;color:var(--ink);flex:none}
+.clear{border:0;background:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+.clear[hidden]{display:none}
 
-/* sheet */
-.sheet{position:fixed;z-index:600;left:0;right:0;bottom:0;height:45%;max-height:calc(100% - 70px - env(safe-area-inset-top));
-  background:linear-gradient(160deg,rgba(255,255,255,.94) 0%,rgba(255,250,246,.94) 45%,rgba(246,245,255,.94) 100%);
-  backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);
-  border-radius:var(--r-xl) var(--r-xl) 0 0;box-shadow:0 -10px 40px rgba(17,19,23,.12);display:flex;flex-direction:column}
-.head{padding:16px 20px 10px;text-align:center}
-.head h2{margin:0;font-size:19px;font-weight:600;letter-spacing:-.01em}
-.head p{margin:2px 0 0;color:var(--muted);font-size:13px}
-.head .ml{font-family:var(--ml)}
-.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 20px 12px;scrollbar-width:none;flex:none}
-.chips::-webkit-scrollbar{display:none}
-.chip{flex:none;border:1px solid var(--line);background:rgba(255,255,255,.8);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
-.chip.on{background:var(--black);color:#fff;border-color:var(--black)}
-select.chip{font-size:16px;appearance:none;-webkit-appearance:none;padding-right:30px;background:rgba(255,255,255,.8) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23111317' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center}
-select.chip.on{color:#fff;background-color:var(--black);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
-.list{flex:1;min-height:0;overflow:auto;padding:2px 14px calc(96px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
-.card{display:grid;grid-template-columns:52px 1fr auto;gap:14px;align-items:center;padding:14px;border-radius:var(--r-lg);background:var(--card);border:1.5px solid transparent;box-shadow:0 4px 18px rgba(17,19,23,.06);cursor:pointer;text-align:left;width:100%}
-.card:hover{border-color:rgba(61,107,255,.35)}
-.card.sel{border-color:var(--warm)}
-.thumb{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:radial-gradient(circle at 30% 25%,#fff 0,var(--green-soft) 70%)}
-.thumb svg{width:28px;height:28px}
-.card h3{margin:0;font-size:15px;font-weight:600;letter-spacing:-.005em;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.card .sub{color:var(--muted);font-size:13px;margin-top:3px}
-.right{display:grid;justify-items:end;gap:6px}
-.km{font-weight:700;font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
-.pill{font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 9px;white-space:nowrap}
-.pill.org{color:var(--green);background:var(--green-soft)}
-.pill.org.wisdom{color:#5b4bd6;background:var(--lilac)}
-.pill.org.knm{color:#b4541c;background:var(--peach)}
-.empty{text-align:center;color:var(--muted);padding:24px 10px}
-.more{align-self:center;border:0;background:rgba(17,19,23,.06);border-radius:999px;padding:9px 16px;font-weight:500;cursor:pointer}
-.cta{position:absolute;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));display:flex;gap:10px}
-.btn{flex:1;height:54px;border:0;border-radius:999px;background:var(--black);color:#fff;font-size:16px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;box-shadow:0 10px 24px rgba(17,19,23,.25)}
-.btn svg{width:20px;height:20px}
+/* floating pill buttons */
+.fab{position:fixed;z-index:650;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom));height:52px;padding:0 26px;border:0;border-radius:999px;background:var(--black);color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.fab svg{width:19px;height:19px}
+.fab[hidden]{display:none}
+#mapBtn{height:46px;padding:0 20px;font-size:15px}
+
+/* list sheet */
+.sheet{position:fixed;z-index:600;left:0;right:0;bottom:0;height:var(--h,48%);background:#fff;border-radius:var(--r-xl) var(--r-xl) 0 0;
+  box-shadow:0 -4px 24px rgba(0,0,0,.14);display:flex;flex-direction:column;transition:height .3s cubic-bezier(.2,.8,.2,1),transform .3s cubic-bezier(.2,.8,.2,1)}
+.sheet.dragging{transition:none}
+body:not(.open) .sheet{transform:translateY(110%)}
+body.full .sheet{border-radius:0}
+.grip{flex:none;cursor:grab;touch-action:none;user-select:none}
+.grip i{display:block;width:36px;height:4px;border-radius:9px;background:#d6d6d6;margin:8px auto 4px}
+.head{display:flex;align-items:center;gap:8px;padding:4px 12px 12px 20px;border-bottom:1px solid var(--line)}
+.head div{flex:1;min-width:0}
+.head h2{margin:0;font-size:18px;font-weight:800;letter-spacing:-.01em}
+.head p{margin:1px 0 0;color:var(--muted);font-size:14px}
+.x{border:0;background:#f2f2f2;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;cursor:pointer;flex:none}
+.x svg{width:16px;height:16px}
+.list{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;margin:0;padding:0 0 calc(90px + env(safe-area-inset-bottom));list-style:none}
+.row{display:flex;align-items:center;gap:14px;padding:16px 16px 16px 20px;border-bottom:1px solid var(--line);cursor:pointer}
+.row:hover{background:#f7f7f7}
+.row.sel{background:#fff5f0}
+.row .info{flex:1;min-width:0}
+.row h3{margin:0;font-size:16px;font-weight:700;line-height:1.3;letter-spacing:-.005em}
+.row .sub{margin-top:4px;color:var(--muted);font-size:14px}
+.row .sub b{color:var(--ink);font-weight:700}
+.dir{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#e8f3ee;color:var(--green)}
+.dir svg{width:20px;height:20px}
+.empty{text-align:center;color:var(--muted);padding:28px 20px}
+.more{display:block;margin:16px auto;border:1px solid var(--ink);background:#fff;border-radius:8px;padding:10px 18px;font-weight:700;cursor:pointer}
 
 /* map popup */
 .leaflet-popup-content-wrapper{border-radius:var(--r-lg);box-shadow:var(--shadow);padding:1px}
 .leaflet-popup-content{margin:18px 20px 16px 18px;font-family:var(--font);line-height:1.4}
-.pop h3{margin:0 0 6px;font-size:19px;font-weight:700;line-height:1.25;letter-spacing:-.01em;color:#16261f}
-.pop .sub{color:#5f6e67;font-size:14px}
+.pop h3{margin:0 0 4px;font-size:18px;font-weight:800;line-height:1.25;letter-spacing:-.01em;color:var(--ink)}
+.pop .sub{color:var(--muted);font-size:14px}
 .pop .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.pop a{text-decoration:none;border-radius:999px;padding:9px 14px;font-weight:500;font-size:14px;white-space:nowrap}
+.pop a{text-decoration:none;border-radius:8px;padding:10px 14px;font-weight:700;font-size:14px;white-space:nowrap}
 .pop a.go{background:var(--green);color:#fff}
-.pop a.gm{border:1.5px solid #dadfdc;color:var(--ink)}
-.pop .co{margin-top:12px;color:#5f6e67;font-size:13px;font-variant-numeric:tabular-nums;user-select:all}
+.pop a.gm{border:1px solid var(--ink);color:var(--ink)}
+.pop .co{margin-top:12px;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums;user-select:all}
 
 /* markers */
 .mk{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#0b6e4f;border:2.5px solid #fff;box-shadow:-2px 3px 8px rgba(0,0,0,.35);display:grid;place-items:center}
@@ -97,44 +95,47 @@ select.chip.on{color:#fff;background-color:var(--black);background-image:url("da
 .mk.sel{background:var(--warm);width:36px;height:36px;margin:-6px 0 0 -3px;box-shadow:-2px 4px 12px rgba(255,122,69,.6)}
 .you{width:20px;height:20px;border-radius:50%;background:var(--you);border:3px solid #fff;box-shadow:0 0 0 10px rgba(61,107,255,.16),0 2px 8px rgba(61,107,255,.5)}
 .cl{width:42px;height:42px;border-radius:50%;background:#0b6e4f;box-shadow:0 0 0 5px rgba(11,110,79,.25),0 4px 12px rgba(0,0,0,.3);display:grid;place-items:center;font-weight:700;font-size:13px;color:#fff;border:2.5px solid #fff}
-.toast{position:fixed;z-index:700;left:50%;top:calc(70px + env(safe-area-inset-top));transform:translateX(-50%);background:rgba(17,19,23,.88);color:#fff;padding:10px 16px;border-radius:999px;font-size:13px;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
+.toast{position:fixed;z-index:800;left:50%;top:calc(74px + env(safe-area-inset-top));transform:translateX(-50%);background:rgba(34,34,34,.92);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 
 @media (min-width:900px){
   .top{left:24px;right:auto;width:400px}
-  .sheet{left:24px;right:auto;top:84px;bottom:24px;width:400px;height:auto!important;max-height:none;border-radius:var(--r-xl);box-shadow:var(--shadow)}
-  .head{padding-top:18px}
+  .sheet{left:24px;right:auto;top:86px;bottom:24px;width:400px;height:auto!important;border-radius:var(--r-xl)!important;box-shadow:var(--shadow)}
+  body:not(.open) .sheet{transform:translateX(-120%)}
+  .grip{cursor:default}.grip i{display:none}.head{padding-top:16px}
+  #mapBtn{display:none}
 }
+@media (prefers-reduced-motion:reduce){.sheet{transition:none}}
 </style>
 </head>
 <body>
 <div id="map" aria-label="Street map"></div>
 
 <div class="top">
-  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search masjid or place" autocomplete="off" aria-label="Search masjid or place"></label>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search masjid or place" autocomplete="off" enterkeyhint="search" aria-label="Search masjid or place"><button class="clear" id="clear" type="button" aria-label="Clear search" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></label>
 </div>
 
-<div class="sheet" id="sheet">
-    <div class="head"><h2 id="title">Find a Masjid</h2><p id="subtitle"><span class="ml">സലഫി മസ്ജിദുകൾ</span> · Kerala</p></div>
-    <div class="chips" id="chips">
-      <select class="chip" id="fDistrict" aria-label="District"><option value="">All districts</option></select>
-    </div>
-    <div class="list" id="list"><p class="empty">Loading masjids…</p></div>
-    <div class="cta"><button class="btn" id="nearBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Near me</button></div>
-</div>
+<button class="fab" id="nearBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Near me</button>
+<button class="fab" id="mapBtn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>Map</button>
+
+<section class="sheet" id="sheet" aria-label="Masjid list">
+  <div class="grip" id="grip">
+    <i></i>
+    <div class="head"><div><h2 id="title">Nearest masjids</h2><p id="subtitle"></p></div>
+      <button class="x" id="closeBtn" type="button" aria-label="Close list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  </div>
+  <ul class="list" id="list"></ul>
+</section>
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script>
-const ORG_SHORT={"KNM (Kerala Nadvathul Mujahideen)":"KNM","KNM Markazudawa":"Markazudawa","Wisdom Islamic Organisation":"Wisdom","Salafi (organisation not specified)":"Salafi"};
-const ORG_CLASS={"KNM":"knm","Markazudawa":"knm","Wisdom":"wisdom","Salafi":""};
-const DOME='<svg viewBox="0 0 32 32"><path d="M16 5c-4 3.4-7.5 5.8-7.5 10.2h15C23.5 10.8 20 8.4 16 5z" fill="#e0a43a"/><rect x="8.5" y="15.2" width="15" height="10.8" rx="1" fill="#0f7a58"/><path d="M14 26v-4.2a2 2 0 014 0V26z" fill="#fff"/><rect x="5" y="12" width="2" height="14" rx="1" fill="#0f7a58"/><rect x="25" y="12" width="2" height="14" rx="1" fill="#0f7a58"/><circle cx="16" cy="3.6" r="1.2" fill="#e0a43a"/></svg>';
 const $=id=>document.getElementById(id);
-const state={q:"",district:"",org:""};
-let masjids=[],you=null,selId=null,listLimit=60,youMarker=null,watchId=null;
+const state={q:""};
+let masjids=[],you=null,selId=null,listLimit=40,youMarker=null,watchId=null,sheetState="closed";
 const isDesk=()=>matchMedia("(min-width:900px)").matches;
 
-/* map: OpenStreetMap tiles, greyed with a CSS filter for the soft look */
+/* map: OpenStreetMap tiles, greyed with a CSS filter so the pins stand out */
 const map=L.map("map",{zoomControl:false,attributionControl:true}).setView([10.6,76.3],7);
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,
   attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
@@ -143,6 +144,7 @@ const cluster=L.markerClusterGroup({showCoverageOnHover:false,maxClusterRadius:5
 map.addLayer(cluster);
 const markers=new Map();
 const PIN='<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 3c-3 2.6-5.5 4.4-5.5 7.6h11C17.5 7.4 15 5.6 12 3zM6 12h12v8H6z"/></svg>';
+const DIR='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.7 11.3l-9-9a1 1 0 00-1.4 0l-9 9a1 1 0 000 1.4l9 9a1 1 0 001.4 0l9-9a1 1 0 000-1.4zM14 14.5V12h-4v3H8v-4a1 1 0 011-1h5V7.5l3.5 3.5z"/></svg>';
 const icon=sel=>L.divIcon({className:"",html:`<div class="mk${sel?" sel":""}">${PIN}</div>`,iconSize:[30,30],iconAnchor:[15,36],popupAnchor:[0,-38]});
 
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -152,9 +154,37 @@ const dirUrl=m=>`https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m
 const viewUrl=m=>`https://www.google.com/maps/search/?api=1&query=${m.lat},${m.lng}`;
 function toast(t,ms=3500){const n=$("toast");n.textContent=t;n.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>n.hidden=true,ms)}
 
+/* sheet states: closed | mini (header only) | half | full */
+const sheet=$("sheet");
+const heights=()=>({mini:96,half:Math.round(innerHeight*.5),full:innerHeight-Math.round(document.querySelector(".top").getBoundingClientRect().bottom+8)});
+function setSheet(st){
+  sheetState=st;
+  document.body.classList.toggle("open",st!=="closed");
+  document.body.classList.toggle("full",st==="full"&&!isDesk());
+  if(st!=="closed"&&!isDesk())sheet.style.setProperty("--h",heights()[st]+"px");
+  $("nearBtn").hidden=st!=="closed";
+  $("mapBtn").hidden=st!=="full";
+}
+const bottomPad=()=>isDesk()||sheetState==="closed"?40:(sheetState==="full"?heights().half:heights()[sheetState])+20;
+const leftPad=()=>isDesk()&&sheetState!=="closed"?450:40;
+(function(){let y0,h0,moved=false,drag=false;
+  const g=$("grip");
+  g.addEventListener("pointerdown",e=>{if(isDesk()||e.target.closest(".x"))return;drag=true;moved=false;y0=e.clientY;h0=sheet.getBoundingClientRect().height;sheet.classList.add("dragging");g.setPointerCapture(e.pointerId)});
+  g.addEventListener("pointermove",e=>{if(!drag)return;if(Math.abs(e.clientY-y0)>6)moved=true;if(moved)sheet.style.setProperty("--h",Math.max(40,Math.min(heights().full,h0+(y0-e.clientY)))+"px")});
+  const end=e=>{if(!drag)return;drag=false;sheet.classList.remove("dragging");
+    if(!moved){setSheet(sheetState==="half"?"full":"half");return}
+    const h=sheet.getBoundingClientRect().height,H=heights();
+    if(h<H.mini*.6){setSheet("closed");return}
+    const best=["mini","half","full"].reduce((a,b)=>Math.abs(H[b]-h)<Math.abs(H[a]-h)?b:a);
+    setSheet(best)};
+  g.addEventListener("pointerup",end);g.addEventListener("pointercancel",end);
+})();
+$("closeBtn").onclick=()=>setSheet("closed");
+$("mapBtn").onclick=()=>setSheet("mini");
+
 function filtered(){
-  const q=state.q.toLowerCase();
-  const r=masjids.filter(m=>(!state.district||m.district===state.district)&&(!state.org||m.org===state.org)&&(!q||(m.name+" "+m.place+" "+m.district).toLowerCase().includes(q)));
+  const q=state.q.toLowerCase().trim();
+  const r=masjids.filter(m=>!q||(m.name+" "+m.place+" "+m.district).toLowerCase().includes(q));
   if(you){r.forEach(m=>m._d=km(you,m));r.sort((a,b)=>a._d-b._d)}
   else r.sort((a,b)=>a.district.localeCompare(b.district)||a.name.localeCompare(b.name));
   return r;
@@ -162,18 +192,21 @@ function filtered(){
 function render(fit,keepMarkers){
   const r=filtered();
   if(!keepMarkers){cluster.clearLayers();cluster.addLayers(r.map(m=>markers.get(m.id)))}
-  $("title").textContent=you?"Nearest Masjids":"Find a Masjid";
-  $("subtitle").innerHTML=you?`${r.length} masjids · nearest first`:(r.length===masjids.length?`<span class="ml">സലഫി മസ്ജിദുകൾ</span> · ${masjids.length} across Kerala`:`${r.length} of ${masjids.length} masjids`);
+  $("title").textContent=state.q?"Results":(you?"Nearest masjids":"Salafi masjids");
+  $("subtitle").textContent=state.q?`${r.length} masjid${r.length===1?"":"s"}${you?" · nearest first":""}`:(you?`${r.length} masjids · nearest first`:`${r.length} across Kerala`);
   const list=$("list");list.replaceChildren();
-  if(!r.length)list.innerHTML='<p class="empty">No masjids match. Try another spelling or filter.</p>';
-  r.slice(0,listLimit).forEach(m=>{
-    const b=document.createElement("button");b.type="button";b.className="card"+(m.id===selId?" sel":"");b.dataset.id=m.id;
-    b.innerHTML=`<div class="thumb">${DOME}</div><div style="min-width:0"><h3>${esc(m.name)}</h3><div class="sub">${esc([m.place,m.district].filter(Boolean).join(" · "))}</div></div>
-      <div class="right">${you?`<span class="km">${fmtKm(m._d)}</span>`:""}</div>`;
-    b.onclick=()=>select(m.id);list.append(b);
-  });
-  if(r.length>listLimit){const b=document.createElement("button");b.type="button";b.className="more";b.textContent=`Show ${Math.min(100,r.length-listLimit)} more`;b.onclick=()=>{listLimit+=100;render()};list.append(b)}
-  if(fit&&r.length)map.fitBounds(L.latLngBounds(r.map(m=>[m.lat,m.lng])),{paddingTopLeft:isDesk()?[440,40]:[30,80],paddingBottomRight:isDesk()?[40,40]:[30,innerHeight*.5],maxZoom:14});
+  if(!r.length)list.innerHTML='<li class="empty">No masjids match that search.</li>';
+  for(const m of r.slice(0,listLimit)){
+    const li=document.createElement("li");li.className="row"+(m.id===selId?" sel":"");li.dataset.id=m.id;li.tabIndex=0;li.setAttribute("role","button");
+    const where=esc(m.place||m.district);
+    li.innerHTML=`<div class="info"><h3>${esc(m.name)}</h3><div class="sub">${you?`<b>${fmtKm(m._d)}</b> · `:""}${where}</div></div>
+      <a class="dir" href="${dirUrl(m)}" target="_blank" rel="noopener" aria-label="Directions to ${esc(m.name)}">${DIR}</a>`;
+    li.onclick=e=>{if(e.target.closest(".dir"))return;select(m.id)};
+    li.onkeydown=e=>{if(e.key==="Enter")select(m.id)};
+    list.append(li);
+  }
+  if(r.length>listLimit){const li=document.createElement("li");li.innerHTML=`<button class="more" type="button">Show more</button>`;li.firstChild.onclick=()=>{listLimit+=60;render(false,true)};list.append(li)}
+  if(fit&&r.length)map.fitBounds(L.latLngBounds(r.slice(0,you?8:r.length).map(m=>[m.lat,m.lng]).concat(you?[[you.lat,you.lng]]:[])),{paddingTopLeft:[leftPad(),90],paddingBottomRight:[40,bottomPad()],maxZoom:15});
 }
 
 function popupHtml(m){
@@ -185,12 +218,21 @@ function select(id){
   const m=masjids.find(x=>x.id===id),mk=markers.get(id);if(!m)return;
   const prev=markers.get(selId);if(prev)prev.setIcon(icon(false));
   selId=id;mk.setIcon(icon(true));
-  document.querySelectorAll(".card").forEach(e=>e.classList.toggle("sel",e.dataset.id===id));
-  cluster.zoomToShowLayer(mk,()=>{map.setView([m.lat,m.lng],Math.max(map.getZoom(),16));mk.openPopup()});
+  document.querySelectorAll(".row").forEach(e=>e.classList.toggle("sel",e.dataset.id===id));
+  if(!isDesk()&&sheetState!=="closed")setSheet("mini"); /* step out of the way, like Google Maps */
+  cluster.zoomToShowLayer(mk,()=>{
+    const z=Math.max(map.getZoom(),16);
+    /* put the pin low enough that its popup fits under the search bar, and clear of the side panel */
+    const wantY=isDesk()?innerHeight/2+120:Math.min(340,innerHeight-bottomPad()-40);
+    const pt=map.project([m.lat,m.lng],z).add([isDesk()&&sheetState!=="closed"?-212:0,innerHeight/2-wantY]);
+    map.setView(map.unproject(pt,z),z);mk.openPopup()});
 }
 
-let qT;$("q").addEventListener("input",e=>{clearTimeout(qT);qT=setTimeout(()=>{state.q=e.target.value;listLimit=60;render(true)},180)});
-$("fDistrict").onchange=e=>{state.district=e.target.value;e.target.classList.toggle("on",!!state.district);listLimit=60;render(true)};
+let qT;
+$("q").addEventListener("input",e=>{$("clear").hidden=!e.target.value;clearTimeout(qT);qT=setTimeout(()=>{state.q=e.target.value;listLimit=40;
+  if(state.q&&sheetState==="closed")setSheet("half");render(true)},200)});
+$("q").addEventListener("keydown",e=>{if(e.key==="Enter"){e.target.blur();if(sheetState==="closed"||sheetState==="mini")setSheet("half")}});
+$("clear").onclick=()=>{$("q").value="";$("clear").hidden=true;state.q="";listLimit=40;if(!you)setSheet("closed");render(!!you)};
 
 function setYou(lat,lng,center){
   /* GPS keeps reporting while you move; ignore jitter under 25 m */
@@ -198,26 +240,31 @@ function setYou(lat,lng,center){
   you={lat,lng};
   if(!youMarker)youMarker=L.marker([lat,lng],{icon:L.divIcon({className:"",html:'<div class="you"></div>',iconSize:[20,20],iconAnchor:[10,10]}),zIndexOffset:1000,interactive:false}).addTo(map);
   else youMarker.setLatLng([lat,lng]);
-  if(center){const near=filtered().slice(0,5);map.fitBounds(L.latLngBounds([[lat,lng],...near.map(m=>[m.lat,m.lng])]),{paddingTopLeft:isDesk()?[440,60]:[40,90],paddingBottomRight:isDesk()?[60,60]:[40,innerHeight*.5],maxZoom:15})}
-  render(false,!center); /* don't rebuild markers on GPS updates, it would close an open popup */
+  if(center){setSheet("half");$("list").scrollTop=0}
+  render(center,!center); /* don't rebuild markers on GPS updates, it would close an open popup */
 }
 function locate(){
+  if(you&&watchId!=null){setSheet("half");render(true,true);return}
   if(!navigator.geolocation){toast("Your browser can't share location. Long-press (or right-click) the map where you are.");return}
   toast("Finding your location…",8000);let first=true;
-  if(watchId!=null)navigator.geolocation.clearWatch(watchId);
-  watchId=navigator.geolocation.watchPosition(p=>{setYou(p.coords.latitude,p.coords.longitude,first);if(first){$("toast").hidden=true;$("list").scrollTop=0;first=false}},
-    err=>toast(err.code===1?"Location is blocked. Allow it in browser settings, or long-press (or right-click) the map where you are.":"Couldn't get your location. Long-press (or right-click) the map where you are.",6000),
+  watchId=navigator.geolocation.watchPosition(p=>{setYou(p.coords.latitude,p.coords.longitude,first);if(first){$("toast").hidden=true;first=false}},
+    err=>{watchId!=null&&navigator.geolocation.clearWatch(watchId);watchId=null;
+      toast(err.code===1?"Location is blocked. Allow it in browser settings, or long-press (or right-click) the map where you are.":"Couldn't get your location. Long-press (or right-click) the map where you are.",6000)},
     {enableHighAccuracy:true,maximumAge:30000,timeout:15000});
 }
 $("nearBtn").onclick=locate;
-map.on("contextmenu",e=>{if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null}setYou(e.latlng.lat,e.latlng.lng,false);toast("Showing masjids nearest to this spot")});
+map.on("contextmenu",e=>{if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null}setYou(e.latlng.lat,e.latlng.lng,true);toast("Showing masjids nearest to this spot")});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&sheetState!=="closed")setSheet("closed")});
+addEventListener("resize",()=>{if(sheetState!=="closed")setSheet(sheetState)});
 
 fetch("masjids.json").then(r=>r.json()).then(data=>{
   masjids=data;
-  for(const m of masjids){const mk=L.marker([m.lat,m.lng],{icon:icon(false),title:m.name});mk.bindPopup(()=>popupHtml(m),{minWidth:285,maxWidth:320,autoPanPaddingTopLeft:[20,80],autoPanPaddingBottomRight:[20,20]});markers.set(m.id,mk)}
-  for(const d of [...new Set(masjids.map(m=>m.district))].sort())$("fDistrict").add(new Option(d,d));
+  for(const m of masjids){const mk=L.marker([m.lat,m.lng],{icon:icon(false),title:m.name});
+    mk.bindPopup(()=>popupHtml(m),{minWidth:285,maxWidth:320,autoPanPaddingTopLeft:[20,80],autoPanPaddingBottomRight:[20,20]});
+    mk.on("click",()=>{const prev=markers.get(selId);if(prev&&prev!==mk)prev.setIcon(icon(false));selId=m.id;mk.setIcon(icon(true))});
+    markers.set(m.id,mk)}
   render();
-}).catch(()=>{$("list").innerHTML='<p class="empty">Couldn’t load the masjid list. Check your connection and reload.</p>'});
+}).catch(()=>toast("Couldn't load the masjid list. Check your connection and reload.",10000));
 
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
