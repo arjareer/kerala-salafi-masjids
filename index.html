@@ -18,7 +18,7 @@
 :root{
   --ink:#222; --muted:#6a6a6a; --line:#ebebeb;
   --glass:rgba(255,255,255,.92); --bg:#eceef2;
-  --black:#222; --green:#0b6e4f; --warm:#ff7a45; --you:#3d6bff;
+  --black:#222; --green:#0b6e4f; --you:#3d6bff;
   --r-xl:24px; --r-lg:18px;
   --shadow:0 6px 20px rgba(0,0,0,.14),0 1px 4px rgba(0,0,0,.08);
   --font:"Nunito Sans",-apple-system,"SF Pro Text",system-ui,sans-serif;
@@ -68,7 +68,7 @@ body.full .sheet{border-radius:0}
 .list{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;margin:0;padding:0 0 calc(90px + env(safe-area-inset-bottom));list-style:none}
 .row{display:flex;align-items:center;gap:14px;padding:16px 16px 16px 20px;border-bottom:1px solid var(--line);cursor:pointer}
 .row:hover{background:#f7f7f7}
-.row.sel{background:#fff5f0}
+.row.sel{background:#eef6f2}
 .row .info{flex:1;min-width:0}
 .row h3{margin:0;font-size:16px;font-weight:700;line-height:1.3;letter-spacing:-.005em}
 .row .sub{margin-top:4px;color:var(--muted);font-size:14px}
@@ -92,7 +92,7 @@ body.full .sheet{border-radius:0}
 /* markers */
 .mk{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#0b6e4f;border:2.5px solid #fff;box-shadow:-2px 3px 8px rgba(0,0,0,.35);display:grid;place-items:center}
 .mk svg{width:15px;height:15px;transform:rotate(45deg)}
-.mk.sel{background:var(--warm);width:36px;height:36px;margin:-6px 0 0 -3px;box-shadow:-2px 4px 12px rgba(255,122,69,.6)}
+.mk.sel{background:#222;width:36px;height:36px;margin:-6px 0 0 -3px;box-shadow:-2px 4px 12px rgba(0,0,0,.45)}
 .you{width:20px;height:20px;border-radius:50%;background:var(--you);border:3px solid #fff;box-shadow:0 0 0 10px rgba(61,107,255,.16),0 2px 8px rgba(61,107,255,.5)}
 .cl{width:42px;height:42px;border-radius:50%;background:#0b6e4f;box-shadow:0 0 0 5px rgba(11,110,79,.25),0 4px 12px rgba(0,0,0,.3);display:grid;place-items:center;font-weight:700;font-size:13px;color:#fff;border:2.5px solid #fff}
 .toast{position:fixed;z-index:800;left:50%;top:calc(74px + env(safe-area-inset-top));transform:translateX(-50%);background:rgba(34,34,34,.92);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
