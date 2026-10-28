@@ -115,10 +115,6 @@ select.chip.on{color:#fff;background-color:var(--black);background-image:url("da
 <div class="sheet" id="sheet">
     <div class="head"><h2 id="title">Find a Masjid</h2><p id="subtitle"><span class="ml">സലഫി മസ്ജിദുകൾ</span> · Kerala</p></div>
     <div class="chips" id="chips">
-      <button class="chip on" data-org="" type="button">All</button>
-      <button class="chip" data-org="KNM (Kerala Nadvathul Mujahideen)" type="button">KNM</button>
-      <button class="chip" data-org="Wisdom Islamic Organisation" type="button">Wisdom</button>
-      <button class="chip" data-org="KNM Markazudawa" type="button">Markazudawa</button>
       <select class="chip" id="fDistrict" aria-label="District"><option value="">All districts</option></select>
     </div>
     <div class="list" id="list"><p class="empty">Loading masjids…</p></div>
@@ -193,8 +189,6 @@ function select(id){
 }
 
 let qT;$("q").addEventListener("input",e=>{clearTimeout(qT);qT=setTimeout(()=>{state.q=e.target.value;listLimit=60;render(true)},180)});
-$("chips").addEventListener("click",e=>{const c=e.target.closest("button.chip");if(!c)return;
-  document.querySelectorAll("button.chip").forEach(x=>x.classList.toggle("on",x===c));state.org=c.dataset.org;listLimit=60;render(true)});
 $("fDistrict").onchange=e=>{state.district=e.target.value;e.target.classList.toggle("on",!!state.district);listLimit=60;render(true)};
 
 function setYou(lat,lng,center){
