@@ -157,7 +157,6 @@ function filtered(){
   else r.sort((a,b)=>a.district.localeCompare(b.district)||a.name.localeCompare(b.name));
   return r;
 }
-function orgPill(m){const s=ORG_SHORT[m.org]||"Salafi";return `<span class="pill org ${ORG_CLASS[s]}">${esc(s)}</span>`}
 function render(fit){
   const r=filtered();
   cluster.clearLayers();cluster.addLayers(r.map(m=>markers.get(m.id)));
@@ -168,7 +167,7 @@ function render(fit){
   r.slice(0,listLimit).forEach(m=>{
     const b=document.createElement("button");b.type="button";b.className="card"+(m.id===selId?" sel":"");
     b.innerHTML=`<div class="thumb">${DOME}</div><div style="min-width:0"><h3>${esc(m.name)}</h3><div class="sub">${esc([m.place,m.district].filter(Boolean).join(" · "))}</div></div>
-      <div class="right">${you?`<span class="km">${fmtKm(m._d)}</span>`:""}${orgPill(m)}</div>`;
+      <div class="right">${you?`<span class="km">${fmtKm(m._d)}</span>`:""}</div>`;
     b.onclick=()=>select(m.id);list.append(b);
   });
   if(r.length>listLimit){const b=document.createElement("button");b.type="button";b.className="more";b.textContent=`Show ${Math.min(100,r.length-listLimit)} more`;b.onclick=()=>{listLimit+=100;render()};list.append(b)}
