@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Kerala Salafi Masjids</title>
 <meta name="description" content="Find Salafi (KNM, Markazudawa, Wisdom) masjids across Kerala on a street map, nearest first, with Google Maps directions.">
-<meta name="theme-color" content="#f4f5f8">
+<meta name="theme-color" content="#fafaf7">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
@@ -16,12 +16,12 @@
 /* Layout (Google Maps style): full-screen map with a search bar and one "Near me" button.
    Near me or a search slides up a list sheet: mini (header only) / half / full screen, or closed. */
 :root{
-  /* airy "private jet" palette: near-white map, navy ink, periwinkle accent. No saffron/orange anywhere. */
-  --ink:#1f2140; --muted:#7c7f93; --line:#eef0f4;
-  --glass:rgba(255,255,255,.94); --bg:#f4f5f8;
-  --black:#1f2140; --accent:#5f5ce0; --accent-soft:#ecebfc; --you:#3d8bff;
+  /* Wimbledon palette: white first, deep green, a whisper of muted champagne gold. No saffron/orange anywhere. */
+  --ink:#1b2a22; --muted:#7c857f; --line:#eeefea;
+  --glass:rgba(255,255,255,.95); --bg:#fafaf7;
+  --black:#0b4d2c; --accent:#2e6b46; --accent-soft:#e9f1eb; --gold:#b49f68; --gold-soft:#f4f0e4; --you:#3d8bff;
   --r-xl:28px; --r-lg:20px;
-  --shadow:0 18px 40px rgba(31,33,64,.10),0 2px 8px rgba(31,33,64,.06);
+  --shadow:0 18px 40px rgba(11,40,25,.10),0 2px 8px rgba(11,40,25,.06);
   --font:"Nunito Sans",-apple-system,"SF Pro Text",system-ui,sans-serif;
   --ml:"Noto Sans Malayalam","Nunito Sans",sans-serif;
   --top:calc(70px + env(safe-area-inset-top));
@@ -33,7 +33,7 @@ button,input{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--you);outline-offset:2px}
 #map{position:fixed;inset:0;background:#e9eaee}
 .leaflet-tile-pane{filter:grayscale(1) brightness(1.2) contrast(.62)}
-#map{background:#f4f5f8!important}
+#map{background:#fafaf7!important}
 .leaflet-control-attribution{font-size:10px;background:rgba(255,255,255,.7)!important;border-radius:8px 0 0 0}
 .leaflet-control-zoom{display:none}
 
@@ -48,8 +48,8 @@ button,input{font:inherit;color:inherit}
 .clear[hidden]{display:none}
 
 /* floating pill buttons */
-.fab{position:fixed;z-index:650;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom));height:52px;padding:0 26px;border:0;border-radius:999px;background:var(--black);color:#fff;font-size:16px;font-weight:600;letter-spacing:.01em;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 16px 36px rgba(31,33,64,.32)}
-.fab svg{width:19px;height:19px}
+.fab{position:fixed;z-index:650;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom));height:52px;padding:0 26px;border:0;border-radius:999px;background:var(--black);color:#fff;font-size:16px;font-weight:600;letter-spacing:.01em;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 16px 36px rgba(11,40,25,.32)}
+.fab svg{width:19px;height:19px;color:var(--gold)}
 .fab[hidden]{display:none}
 #mapBtn{height:46px;padding:0 20px;font-size:15px}
 
@@ -64,18 +64,19 @@ body.full .sheet{border-radius:0}
 .head{display:flex;align-items:center;gap:8px;padding:4px 12px 12px 20px;border-bottom:1px solid var(--line)}
 .head div{flex:1;min-width:0}
 .head h2{margin:0;font-size:24px;font-weight:300;letter-spacing:-.01em}
+.head h2::after{content:"";display:block;width:28px;height:2px;background:var(--gold);margin:6px 0 4px;border-radius:2px}
 .head p{margin:1px 0 0;color:var(--muted);font-size:14px}
-.x{border:0;background:#fff;box-shadow:0 6px 16px rgba(31,33,64,.12);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;cursor:pointer;flex:none}
+.x{border:0;background:#fff;box-shadow:0 6px 16px rgba(11,40,25,.12);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;cursor:pointer;flex:none}
 .x svg{width:16px;height:16px}
 .list{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;margin:0;padding:0 0 calc(90px + env(safe-area-inset-bottom));list-style:none}
 .row{display:flex;align-items:center;gap:14px;padding:16px 16px 16px 20px;border-bottom:1px solid var(--line);cursor:pointer}
 .row:hover{background:#f7f7f7}
-.row.sel{background:#eef6f2}
+.row.sel{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--gold)}
 .row .info{flex:1;min-width:0}
 .row h3{margin:0;font-size:16px;font-weight:600;line-height:1.3;letter-spacing:-.005em}
 .row .sub{margin-top:6px;color:var(--muted);font-size:14px;display:flex;align-items:center;gap:8px}
-.row .sub b{background:var(--accent);color:#fff;font-weight:600;font-size:12.5px;padding:2px 8px;border-radius:5px;box-shadow:0 4px 10px rgba(95,92,224,.3)}
-.dir{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--accent);box-shadow:0 8px 20px rgba(31,33,64,.12)}
+.row .sub b{background:var(--accent);color:#fff;font-weight:600;font-size:12.5px;padding:2px 8px;border-radius:5px;box-shadow:0 4px 10px rgba(46,107,70,.3)}
+.dir{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--accent);box-shadow:0 8px 20px rgba(11,40,25,.12)}
 .dir svg{width:20px;height:20px}
 .empty{text-align:center;color:var(--muted);padding:28px 20px}
 .more{display:block;margin:16px auto;border:1px solid var(--ink);background:#fff;border-radius:8px;padding:10px 18px;font-weight:700;cursor:pointer}
@@ -92,12 +93,12 @@ body.full .sheet{border-radius:0}
 .pop .co{margin-top:12px;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums;user-select:all}
 
 /* markers */
-.mk{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--black);border:2.5px solid #fff;box-shadow:-3px 6px 14px rgba(31,33,64,.35);display:grid;place-items:center}
+.mk{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--black);border:2.5px solid #fff;box-shadow:-3px 6px 14px rgba(11,40,25,.35);display:grid;place-items:center}
 .mk svg{width:15px;height:15px;transform:rotate(45deg)}
-.mk.sel{background:var(--accent);width:36px;height:36px;margin:-6px 0 0 -3px;box-shadow:-3px 8px 18px rgba(95,92,224,.55)}
+.mk.sel{background:var(--black);border-color:var(--gold);border-width:3px;width:36px;height:36px;margin:-6px 0 0 -3px;box-shadow:-3px 8px 18px rgba(46,107,70,.55)}
 .you{width:18px;height:18px;border-radius:50%;background:var(--you);border:3px solid #fff;box-shadow:0 0 0 12px rgba(61,139,255,.14),0 4px 10px rgba(61,139,255,.45)}
-.cl{width:44px;height:44px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 7px rgba(95,92,224,.16),0 10px 22px rgba(31,33,64,.25);display:grid;place-items:center;font-weight:600;font-size:13px;color:#fff;border:2.5px solid #fff}
-.chip-km{background:var(--accent);color:#fff;font:600 12.5px var(--font);padding:4px 9px;border-radius:6px;white-space:nowrap;box-shadow:0 6px 14px rgba(95,92,224,.35);transform:translate(-50%,-50%);display:inline-block}
+.cl{width:44px;height:44px;border-radius:50%;background:var(--black);box-shadow:0 0 0 6px rgba(180,159,104,.22),0 10px 22px rgba(11,40,25,.25);display:grid;place-items:center;font-weight:600;font-size:13px;color:#fff;border:2.5px solid #fff}
+.chip-km{background:var(--accent);color:#fff;font:600 12.5px var(--font);padding:4px 9px;border-radius:6px;white-space:nowrap;box-shadow:0 6px 14px rgba(46,107,70,.35);transform:translate(-50%,-50%);display:inline-block}
 .toast{position:fixed;z-index:800;left:50%;top:calc(74px + env(safe-area-inset-top));transform:translateX(-50%);background:rgba(34,34,34,.92);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 
 @media (min-width:900px){
@@ -225,7 +226,7 @@ function drawRoute(m){
   const a=[you.lat,you.lng],b=[m.lat,m.lng],dx=b[1]-a[1],dy=b[0]-a[0];
   const c=[(a[0]+b[0])/2-dx*.25,(a[1]+b[1])/2+dy*.25],pts=[];
   for(let t=0;t<=1.0001;t+=.05)pts.push([(1-t)**2*a[0]+2*(1-t)*t*c[0]+t*t*b[0],(1-t)**2*a[1]+2*(1-t)*t*c[1]+t*t*b[1]]);
-  route=L.polyline(pts,{color:"#5f5ce0",weight:2.5,opacity:.85,dashArray:"1 7",lineCap:"round",interactive:false}).addTo(map);
+  route=L.polyline(pts,{color:"#b49f68",weight:3,opacity:.85,dashArray:"1 7",lineCap:"round",interactive:false}).addTo(map);
   routeChip=L.marker(pts[10],{interactive:false,icon:L.divIcon({className:"",html:`<span class="chip-km">${fmtKm(km(you,m))}</span>`,iconSize:[0,0]})}).addTo(map);
 }
 function select(id){
