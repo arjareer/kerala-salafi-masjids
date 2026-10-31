@@ -344,7 +344,7 @@ fetch("masjids.json").then(r=>r.json()).then(data=>{
 
 
 /* ---- Suggest a masjid: builds a request the owner checks; nothing is added to the map ---- */
-const CONTRIBUTE={channel:"",to:""}; /* channel: "whatsapp" (to = number with country code, digits only) or "email" */
+const CONTRIBUTE={channel:"whatsapp",to:"919746837050"}; /* channel: "whatsapp" (to = number with country code, digits only) or "email" */
 const sgLoc={lat:null,lng:null};let sheetBefore="closed";
 function openSuggest(){$("suggest").hidden=false;$("sgErr").hidden=true;
   $("sgFine").textContent=CONTRIBUTE.channel==="whatsapp"?"Opens WhatsApp with your request ready to send.":CONTRIBUTE.channel==="email"?"Opens your email app with your request ready to send.":"";
