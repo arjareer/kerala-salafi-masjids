@@ -1,6 +1,6 @@
 # Kerala Salafi Masjids
 
-A street-map finder for Salafi (KNM, Markazudawa, Wisdom) masjids in Kerala: search, district and organisation filters, GPS "near me", and Google Maps directions. It's plain static files (Leaflet + OpenStreetMap), so it runs on GitHub Pages with no build step.
+A street-map finder for Salafi masjids in Kerala: search, GPS "near me", Google Maps directions, and a "Suggest a masjid" request form. It's plain static files (Leaflet + OpenStreetMap), so it runs on GitHub Pages with no build step.
 
 ## Adding or editing masjids
 Edit `masjids.json`. Each entry looks like:
