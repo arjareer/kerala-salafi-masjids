@@ -345,10 +345,13 @@ fetch("masjids.json").then(r=>r.json()).then(data=>{
 
 
 /* ---- Suggest a masjid: builds a request the owner checks; nothing is added to the map ---- */
-const CONTRIBUTE={channel:"",to:""}; /* where requests go; the "Suggest a masjid" row stays hidden until this is set */
+/* where requests go: a Google Form whose answers land in the owner's Google Sheet for checking.
+   The "Suggest a masjid" row stays hidden if channel is empty. */
+const CONTRIBUTE={channel:"gform",to:"https://docs.google.com/forms/d/e/1FAIpQLSfTQi10We5gx23Vwd-FIfW4EJTHnhAjkkFuevkI_T2KrG75cw/formResponse",
+  fields:{name:"entry.603604614",area:"entry.1664891392",map:"entry.49671013"}};
 const sgLoc={lat:null,lng:null};let sheetBefore="closed";
 function openSuggest(){$("suggest").hidden=false;$("sgErr").hidden=true;
-  $("sgFine").textContent=CONTRIBUTE.channel==="email"?"Opens your email app with your request ready to send.":"";
+  $("sgFine").textContent=CONTRIBUTE.channel==="gform"?"Your request is sent privately for checking.":CONTRIBUTE.channel==="email"?"Opens your email app with your request ready to send.":"";
   setTimeout(()=>$("sgName").focus(),50)}
 function closeSuggest(){$("suggest").hidden=true}
 function showLoc(){const ok=sgLoc.lat!=null;$("sgLoc").className="locstate"+(ok?" ok":"");$("sgLoc").textContent=ok?`✓ Spot chosen (${sgLoc.lat.toFixed(5)}, ${sgLoc.lng.toFixed(5)})`:"No spot chosen yet"}
@@ -369,6 +372,16 @@ $("sgForm").addEventListener("submit",e=>{e.preventDefault();
   const miss=[!name&&"the masjid name",!area&&"the area",sgLoc.lat==null&&"the location"].filter(Boolean);
   if(miss.length){$("sgErr").textContent="Please add "+miss.join(", ").replace(/, ([^,]*)$/," and $1")+".";$("sgErr").hidden=false;return}
   const text=["Masjid suggestion · Kerala Salafi Masjids","","Name: "+name,"Area: "+area,"Location: https://www.google.com/maps?q="+sgLoc.lat+","+sgLoc.lng].join("\n");
+  const mapLink="https://www.google.com/maps?q="+sgLoc.lat+","+sgLoc.lng;
+  if(CONTRIBUTE.channel==="gform"){
+    const f=CONTRIBUTE.fields,body=new URLSearchParams({[f.name]:name,[f.area]:area,[f.map]:mapLink});
+    $("sgSend").disabled=true;$("sgSend").textContent="Sending…";
+    /* Google doesn't allow reading the reply (no-cors), so a finished request counts as sent */
+    fetch(CONTRIBUTE.to,{method:"POST",mode:"no-cors",body}).then(()=>{
+      closeSuggest();$("sgForm").reset();sgLoc.lat=sgLoc.lng=null;showLoc();toast("Thank you! Your suggestion was sent for checking.",5000)
+    },()=>{$("sgErr").textContent="Couldn't send. Check your connection and try again.";$("sgErr").hidden=false})
+    .finally(()=>{$("sgSend").disabled=false;$("sgSend").textContent="Send request"});
+    return}
   let url="";
   if(CONTRIBUTE.channel==="email"&&CONTRIBUTE.to)url="mailto:"+CONTRIBUTE.to+"?subject="+encodeURIComponent("Masjid suggestion: "+name)+"&body="+encodeURIComponent(text);
   if(url){location.href=url;closeSuggest();toast("Thanks! Your request is ready to send.",5000)}
