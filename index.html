@@ -55,6 +55,10 @@ button,input,textarea{font:inherit;color:inherit}
 .fab svg{width:19px;height:19px;color:var(--gold)}
 .fab[hidden]{display:none}
 #mapBtn{height:46px;padding:0 20px;font-size:15px}
+.addbtn{-webkit-appearance:none;appearance:none;position:fixed;z-index:650;right:max(16px,env(safe-area-inset-right));bottom:calc(24px + env(safe-area-inset-bottom));height:52px;min-width:52px;padding:0 16px;border:1px solid var(--gold);border-radius:999px;background:#fff;color:var(--black);display:flex;align-items:center;justify-content:center;gap:6px;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 12px 28px rgba(11,40,25,.18)}
+.addbtn svg{width:20px;height:20px;flex:none}
+.addbtn[hidden]{display:none}
+@media (max-width:480px){.addbtn span{display:none}.addbtn{padding:0;width:52px}}
 
 /* list sheet */
 .sheet{position:fixed;z-index:600;left:0;right:0;bottom:0;height:var(--h,48%);background:#fff;border-radius:var(--r-xl) var(--r-xl) 0 0;
@@ -136,7 +140,7 @@ body.picking .pickhint{display:block;position:fixed;z-index:700;left:50%;transfo
 body.picking .pickbar{display:flex;gap:10px;position:fixed;z-index:700;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom))}
 body.picking .pickbar button{white-space:nowrap;height:50px;border-radius:999px;padding:0 22px;font-weight:600;font-size:15px;border:0;cursor:pointer;box-shadow:0 12px 28px rgba(11,40,25,.25)}
 body.picking .pickbar .ok{background:var(--black);color:#fff}body.picking .pickbar .no{background:#fff;color:var(--ink)}
-body.picking .sheet,body.picking #nearBtn,body.picking #mapBtn{visibility:hidden}
+body.picking .sheet,body.picking #nearBtn,body.picking #mapBtn,body.picking #addBtn{visibility:hidden}
 @media (min-width:900px){.modal{align-items:center}.card{border-radius:var(--r-xl)}}
 .toast{position:fixed;z-index:800;left:50%;top:calc(74px + env(safe-area-inset-top));transform:translateX(-50%);background:rgba(34,34,34,.92);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 
@@ -159,6 +163,8 @@ body.picking .sheet,body.picking #nearBtn,body.picking #mapBtn{visibility:hidden
 
 <button class="fab" id="nearBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Near me</button>
 <button class="fab" id="mapBtn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>Map</button>
+
+<button class="addbtn" id="addBtn" type="button" aria-label="Suggest a masjid" title="Suggest a masjid" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>Suggest a masjid</span></button>
 
 <section class="sheet" id="sheet" aria-label="Masjid list">
   <div class="grip" id="grip">
@@ -225,6 +231,7 @@ function setSheet(st){
   document.body.classList.toggle("full",st==="full"&&!isDesk());
   if(st!=="closed"&&!isDesk())sheet.style.setProperty("--h",heights()[st]+"px");
   $("nearBtn").hidden=st!=="closed";
+  $("addBtn").hidden=st!=="closed"||!CONTRIBUTE.channel;
   $("mapBtn").hidden=st!=="full";
 }
 const bottomPad=()=>isDesk()||sheetState==="closed"?40:(sheetState==="full"?heights().half:heights()[sheetState])+20;
@@ -356,6 +363,7 @@ function openSuggest(){$("suggest").hidden=false;$("sgErr").hidden=true;
 function closeSuggest(){$("suggest").hidden=true}
 function showLoc(){const ok=sgLoc.lat!=null;$("sgLoc").className="locstate"+(ok?" ok":"");$("sgLoc").textContent=ok?`✓ Spot chosen (${sgLoc.lat.toFixed(5)}, ${sgLoc.lng.toFixed(5)})`:"No spot chosen yet"}
 $("sgClose").onclick=closeSuggest;
+$("addBtn").onclick=openSuggest;$("addBtn").hidden=!CONTRIBUTE.channel;
 $("suggest").addEventListener("click",e=>{if(e.target.id==="suggest")closeSuggest()});
 $("sgPick").onclick=()=>{closeSuggest();sheetBefore=sheetState;map.closePopup();document.body.classList.add("picking");
   if(sgLoc.lat!=null)map.setView([sgLoc.lat,sgLoc.lng],17);else if(you)map.setView([you.lat,you.lng],16);else if(map.getZoom()<12)map.setZoom(12)};
