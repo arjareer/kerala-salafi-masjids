@@ -271,7 +271,7 @@ function render(fit,keepMarkers){
     list.append(li);
   }
   if(r.length>listLimit){const li=document.createElement("li");li.innerHTML=`<button class="more" type="button">Show more</button>`;li.firstChild.onclick=()=>{listLimit+=60;render(false,true)};list.append(li)}
-  list.append(sg);
+  if(CONTRIBUTE.channel)list.append(sg);
   if(fit&&r.length)map.fitBounds(L.latLngBounds(r.slice(0,you?8:r.length).map(m=>[m.lat,m.lng]).concat(you?[[you.lat,you.lng]]:[])),{paddingTopLeft:[leftPad(),90],paddingBottomRight:[40,bottomPad()],maxZoom:15});
 }
 
@@ -345,10 +345,10 @@ fetch("masjids.json").then(r=>r.json()).then(data=>{
 
 
 /* ---- Suggest a masjid: builds a request the owner checks; nothing is added to the map ---- */
-const CONTRIBUTE={channel:"whatsapp",to:""}; /* channel: "whatsapp" (to = number with country code, digits only) or "email" */
+const CONTRIBUTE={channel:"",to:""}; /* where requests go; the "Suggest a masjid" row stays hidden until this is set */
 const sgLoc={lat:null,lng:null};let sheetBefore="closed";
 function openSuggest(){$("suggest").hidden=false;$("sgErr").hidden=true;
-  $("sgFine").textContent=CONTRIBUTE.channel==="whatsapp"?"Opens WhatsApp with your request ready to send.":CONTRIBUTE.channel==="email"?"Opens your email app with your request ready to send.":"";
+  $("sgFine").textContent=CONTRIBUTE.channel==="email"?"Opens your email app with your request ready to send.":"";
   setTimeout(()=>$("sgName").focus(),50)}
 function closeSuggest(){$("suggest").hidden=true}
 function showLoc(){const ok=sgLoc.lat!=null;$("sgLoc").className="locstate"+(ok?" ok":"");$("sgLoc").textContent=ok?`✓ Spot chosen (${sgLoc.lat.toFixed(5)}, ${sgLoc.lng.toFixed(5)})`:"No spot chosen yet"}
@@ -370,8 +370,7 @@ $("sgForm").addEventListener("submit",e=>{e.preventDefault();
   if(miss.length){$("sgErr").textContent="Please add "+miss.join(", ").replace(/, ([^,]*)$/," and $1")+".";$("sgErr").hidden=false;return}
   const text=["Masjid suggestion · Kerala Salafi Masjids","","Name: "+name,"Area: "+area,"Location: https://www.google.com/maps?q="+sgLoc.lat+","+sgLoc.lng].join("\n");
   let url="";
-  if(CONTRIBUTE.channel==="whatsapp"&&CONTRIBUTE.to)url="https://wa.me/"+CONTRIBUTE.to+"?text="+encodeURIComponent(text);
-  else if(CONTRIBUTE.channel==="email"&&CONTRIBUTE.to)url="mailto:"+CONTRIBUTE.to+"?subject="+encodeURIComponent("Masjid suggestion: "+name)+"&body="+encodeURIComponent(text);
+  if(CONTRIBUTE.channel==="email"&&CONTRIBUTE.to)url="mailto:"+CONTRIBUTE.to+"?subject="+encodeURIComponent("Masjid suggestion: "+name)+"&body="+encodeURIComponent(text);
   if(url){location.href=url;closeSuggest();toast("Thanks! Your request is ready to send.",5000)}
   else{(navigator.clipboard?navigator.clipboard.writeText(text):Promise.reject()).then(()=>toast("Suggestions aren't switched on yet. Your request was copied.",6000),()=>toast("Suggestions aren't switched on yet.",6000))}
 });
