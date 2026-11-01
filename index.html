@@ -183,8 +183,6 @@ body.picking .sheet,body.picking #nearBtn,body.picking #mapBtn{visibility:hidden
     <div class="field"><span>Location</span>
       <div class="loc"><button class="obtn" id="sgPick" type="button">Pick on map</button><button class="obtn" id="sgHere" type="button">I'm at the masjid now</button></div>
       <div class="locstate" id="sgLoc">No spot chosen yet</div></div>
-    <label class="field"><span>Note <i>(optional)</i></span><textarea id="sgNote" placeholder="Organisation, Jumu'ah time, women's area, anything useful"></textarea></label>
-    <label class="field"><span>Your name <i>(optional)</i></span><input id="sgFrom" autocomplete="name"></label>
     <p class="err" id="sgErr" hidden></p>
     <button class="send" type="submit" id="sgSend">Send request</button>
     <p class="fine" id="sgFine"></p>
@@ -367,11 +365,10 @@ $("sgHere").onclick=()=>{if(!navigator.geolocation){$("sgLoc").textContent="Your
   navigator.geolocation.getCurrentPosition(p=>{sgLoc.lat=+p.coords.latitude.toFixed(6);sgLoc.lng=+p.coords.longitude.toFixed(6);showLoc()},
     ()=>{$("sgLoc").textContent="Couldn't get your location. Use Pick on map instead."},{enableHighAccuracy:true,timeout:15000})};
 $("sgForm").addEventListener("submit",e=>{e.preventDefault();
-  const name=$("sgName").value.trim(),area=$("sgArea").value.trim(),note=$("sgNote").value.trim(),from=$("sgFrom").value.trim();
+  const name=$("sgName").value.trim(),area=$("sgArea").value.trim();
   const miss=[!name&&"the masjid name",!area&&"the area",sgLoc.lat==null&&"the location"].filter(Boolean);
   if(miss.length){$("sgErr").textContent="Please add "+miss.join(", ").replace(/, ([^,]*)$/," and $1")+".";$("sgErr").hidden=false;return}
-  const text=["Masjid suggestion · Kerala Salafi Masjids","","Name: "+name,"Area: "+area,"Location: https://www.google.com/maps?q="+sgLoc.lat+","+sgLoc.lng,
-    note&&"Note: "+note,from&&"From: "+from].filter(x=>x!==false&&x!=="").join("\n");
+  const text=["Masjid suggestion · Kerala Salafi Masjids","","Name: "+name,"Area: "+area,"Location: https://www.google.com/maps?q="+sgLoc.lat+","+sgLoc.lng].join("\n");
   let url="";
   if(CONTRIBUTE.channel==="whatsapp"&&CONTRIBUTE.to)url="https://wa.me/"+CONTRIBUTE.to+"?text="+encodeURIComponent(text);
   else if(CONTRIBUTE.channel==="email"&&CONTRIBUTE.to)url="mailto:"+CONTRIBUTE.to+"?subject="+encodeURIComponent("Masjid suggestion: "+name)+"&body="+encodeURIComponent(text);
