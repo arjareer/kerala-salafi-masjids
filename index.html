@@ -85,7 +85,8 @@ body.full .sheet{border-radius:0}
 .row .sub b{background:var(--accent);color:#fff;font-weight:600;font-size:12.5px;padding:2px 8px;border-radius:5px;box-shadow:0 4px 10px rgba(46,107,70,.3)}
 .dir{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--accent);box-shadow:0 8px 20px rgba(11,40,25,.12)}
 .dir svg{width:20px;height:20px}
-.empty{text-align:center;color:var(--muted);padding:28px 20px}
+.empty{text-align:center;color:var(--muted);padding:28px 24px 20px;font-size:14px;border-bottom:1px solid var(--line)}
+.empty strong{display:block;color:var(--ink);font-size:17px;font-weight:600;margin-bottom:4px;overflow-wrap:anywhere}
 .more{display:block;margin:16px auto;border:1px solid var(--ink);background:#fff;border-radius:8px;padding:10px 18px;font-weight:700;cursor:pointer}
 
 /* map popup */
@@ -94,13 +95,13 @@ body.full .sheet{border-radius:0}
 .pop h3{margin:0 0 4px;padding-right:30px;font-size:20px;font-weight:300;line-height:1.25;letter-spacing:-.01em;color:var(--ink)}
 .pop .sub{color:var(--muted);font-size:14px}
 .pop .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.pop a{text-decoration:none;border-radius:8px;padding:10px 14px;font-weight:700;font-size:14px;white-space:nowrap}
+.pop a,.pop button{font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none;border-radius:8px;padding:10px 14px;font-weight:700;font-size:14px;white-space:nowrap}
 .pop a.go{background:var(--accent);border:1px solid var(--accent);color:#fff}
-.pop a.gm{border:1px solid var(--ink);color:var(--ink)}
+.pop .sh{border:1px solid var(--ink);background:#fff;color:var(--ink)}
+.pop .sh svg{width:16px;height:16px}
 .leaflet-container a.leaflet-popup-close-button{top:14px;right:14px;width:28px;height:28px;border-radius:50%;background:#f2f3ef;color:var(--ink);font:400 18px/28px var(--font);text-align:center}
 .leaflet-container a.leaflet-popup-close-button:hover{background:#e7e9e3;color:var(--ink)}
 .leaflet-container a.leaflet-popup-close-button span{display:block;line-height:27px}
-.pop .co{margin-top:12px;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums;user-select:all}
 
 /* markers */
 .mk{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--black);border:2.5px solid #fff;box-shadow:-3px 6px 14px rgba(11,40,25,.35);display:grid;place-items:center}
@@ -212,6 +213,7 @@ const cluster=L.markerClusterGroup({showCoverageOnHover:false,maxClusterRadius:5
 map.addLayer(cluster);
 const markers=new Map();
 const PIN='<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 3c-3 2.6-5.5 4.4-5.5 7.6h11C17.5 7.4 15 5.6 12 3zM6 12h12v8H6z"/></svg>';
+const SHARE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"/></svg>';
 const DIR='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.7 11.3l-9-9a1 1 0 00-1.4 0l-9 9a1 1 0 000 1.4l9 9a1 1 0 001.4 0l9-9a1 1 0 000-1.4zM14 14.5V12h-4v3H8v-4a1 1 0 011-1h5V7.5l3.5 3.5z"/></svg>';
 const icon=sel=>L.divIcon({className:"",html:`<div class="mk${sel?" sel":""}">${PIN}</div>`,iconSize:[30,30],iconAnchor:[15,36],popupAnchor:[0,-38]});
 
@@ -219,6 +221,7 @@ function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&l
 function km(a,b){const R=6371,t=Math.PI/180,dLat=(b.lat-a.lat)*t,dLng=(b.lng-a.lng)*t;const h=Math.sin(dLat/2)**2+Math.cos(a.lat*t)*Math.cos(b.lat*t)*Math.sin(dLng/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 function fmtKm(d){return d<1?Math.round(d*1000)+" m":(d<10?d.toFixed(1):Math.round(d))+" km"}
 const dirUrl=m=>`https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}`;
+const placeOf=m=>m.place&&m.place.toLowerCase()!==String(m.district).toLowerCase()?m.place+", "+m.district:(m.place||m.district);
 const viewUrl=m=>`https://www.google.com/maps/search/?api=1&query=${m.lat},${m.lng}`;
 function toast(t,ms=3500){const n=$("toast");n.textContent=t;n.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>n.hidden=true,ms)}
 
@@ -258,19 +261,32 @@ function filtered(){
   else r.sort((a,b)=>a.district.localeCompare(b.district)||a.name.localeCompare(b.name));
   return r;
 }
+/* the chosen pin sits on the map itself, outside the clusters, so it stays visible at any zoom */
+let selMk=null,shown=new Set();
+function liftSel(mk){
+  if(selMk&&selMk!==mk){map.removeLayer(selMk);selMk.setIcon(icon(false));if(shown.has(selMk))cluster.addLayer(selMk)}
+  if(selMk!==mk){cluster.removeLayer(mk);mk.addTo(map)}
+  mk.setIcon(icon(true));selMk=mk;
+}
+function clearSel(){
+  map.closePopup();
+  if(selMk){map.removeLayer(selMk);selMk.setIcon(icon(false));selMk=null}
+  selId=null;if(route){map.removeLayer(route);map.removeLayer(routeChip);route=null}
+}
 function render(fit,keepMarkers){
   const r=filtered();
-  if(!keepMarkers){cluster.clearLayers();cluster.addLayers(r.map(m=>markers.get(m.id)))}
+  if(!keepMarkers){clearSel();shown=new Set(r.map(m=>markers.get(m.id)));cluster.clearLayers();cluster.addLayers([...shown])}
   $("title").textContent=state.q?"Results":(you?"Nearest masjids":"Salafi masjids");
-  $("subtitle").textContent=state.q?`${r.length} masjid${r.length===1?"":"s"}${you?" · nearest first":""}`:(you?`${r.length} masjids · nearest first`:`${r.length} across Kerala`);
+  $("subtitle").textContent=state.q&&!r.length?"No matches":state.q?`${r.length} masjid${r.length===1?"":"s"}${you?" · nearest first":""}`:(you?`${r.length} masjids · nearest first`:`${r.length} across Kerala`);
   const list=$("list");list.replaceChildren();
-  if(!r.length)list.innerHTML='<li class="empty">No masjids match that search.</li>';
+  if(!r.length)list.innerHTML=`<li class="empty"><strong>No masjid called “${esc(state.q.trim())}” yet</strong>Check the spelling or try the town name. If it's missing, suggest it below so others can find it.</li>`;
   const sg=document.createElement("li");sg.className="suggest-row";sg.tabIndex=0;sg.setAttribute("role","button");
   sg.innerHTML=`<span class="plus">+</span><span>${r.length?"Missing a masjid?":"Can't find it?"} Suggest one<small>It's checked before it's added</small></span>`;
-  sg.onclick=()=>openSuggest();sg.onkeydown=e=>{if(e.key==="Enter")openSuggest()};
+  const pre=r.length?"":state.q.trim();
+  sg.onclick=()=>openSuggest(pre);sg.onkeydown=e=>{if(e.key==="Enter")openSuggest(pre)};
   for(const m of r.slice(0,listLimit)){
     const li=document.createElement("li");li.className="row"+(m.id===selId?" sel":"");li.dataset.id=m.id;li.tabIndex=0;li.setAttribute("role","button");
-    const where=esc(m.place||m.district);
+    const where=esc(placeOf(m));
     li.innerHTML=`<div class="info"><h3>${esc(m.name)}</h3><div class="sub">${you?`<b>${fmtKm(m._d)}</b>`:""}${where}</div></div>
       <a class="dir" href="${dirUrl(m)}" target="_blank" rel="noopener" aria-label="Directions to ${esc(m.name)}">${DIR}</a>`;
     li.onclick=e=>{if(e.target.closest(".dir"))return;select(m.id)};
@@ -283,9 +299,8 @@ function render(fit,keepMarkers){
 }
 
 function popupHtml(m){
-  return `<div class="pop"><h3>${esc(m.name)}</h3><div class="sub">${esc(m.place||m.district)}${you?" · "+fmtKm(km(you,m))+" away":""}</div>
-  <div class="acts"><a class="go" href="${dirUrl(m)}" target="_blank" rel="noopener">Directions</a><a class="gm" href="${viewUrl(m)}" target="_blank" rel="noopener">Open in Google Maps</a></div>
-  <div class="co">${m.lat}, ${m.lng}</div></div>`;
+  return `<div class="pop"><h3>${esc(m.name)}</h3><div class="sub">${esc(placeOf(m))}${you?" · "+fmtKm(km(you,m))+" away":""}</div>
+  <div class="acts"><a class="go" href="${dirUrl(m)}" target="_blank" rel="noopener">Directions</a><button class="sh" type="button" data-id="${m.id}">${SHARE}Share</button></div></div>`;
 }
 /* curved dashed route from you to the chosen masjid, with a distance chip, like a flight path */
 let route=null,routeChip=null;
@@ -296,25 +311,30 @@ function drawRoute(m){
   const c=[(a[0]+b[0])/2-dx*.25,(a[1]+b[1])/2+dy*.25],pts=[];
   for(let t=0;t<=1.0001;t+=.05)pts.push([(1-t)**2*a[0]+2*(1-t)*t*c[0]+t*t*b[0],(1-t)**2*a[1]+2*(1-t)*t*c[1]+t*t*b[1]]);
   route=L.polyline(pts,{color:"#b49f68",weight:3,opacity:.85,dashArray:"1 7",lineCap:"round",interactive:false}).addTo(map);
-  routeChip=L.marker(pts[10],{interactive:false,icon:L.divIcon({className:"",html:`<span class="chip-km">${fmtKm(km(you,m))}</span>`,iconSize:[0,0]})}).addTo(map);
+  routeChip=L.marker(pts[10],{interactive:false,zIndexOffset:900,icon:L.divIcon({className:"",html:`<span class="chip-km">${fmtKm(km(you,m))}</span>`,iconSize:[0,0]})}).addTo(map);
 }
 function select(id){
   const m=masjids.find(x=>x.id===id),mk=markers.get(id);if(!m)return;
-  const prev=markers.get(selId);if(prev)prev.setIcon(icon(false));
-  selId=id;mk.setIcon(icon(true));
+  map.closePopup();liftSel(mk);selId=id;
   document.querySelectorAll(".row").forEach(e=>e.classList.toggle("sel",e.dataset.id===id));
   if(!isDesk()&&sheetState!=="closed")setSheet("mini"); /* step out of the way, like Google Maps */
-  cluster.zoomToShowLayer(mk,()=>{
-    const z=Math.max(map.getZoom(),16);
-    /* put the pin low enough that its popup fits under the search bar, and clear of the side panel */
-    const wantY=isDesk()?innerHeight/2+120:Math.min(340,innerHeight-bottomPad()-40);
-    const pt=map.project([m.lat,m.lng],z).add([isDesk()&&sheetState!=="closed"?-212:0,innerHeight/2-wantY]);
-    map.flyTo(map.unproject(pt,z),z,{duration:.8});map.once("moveend",()=>mk.openPopup());drawRoute(m)});
+  map.once("moveend",()=>mk.openPopup());drawRoute(m);
+  if(you){
+    /* frame both you and the masjid, with room above for the popup and below for the list */
+    map.flyToBounds(L.latLngBounds([[m.lat,m.lng],[you.lat,you.lng]]),
+      {paddingTopLeft:[leftPad()+20,isDesk()?230:250],paddingBottomRight:[60,bottomPad()+20],maxZoom:15,duration:.8});
+    return;
+  }
+  const z=Math.max(map.getZoom(),16);
+  /* put the pin low enough that its popup fits under the search bar, and clear of the side panel */
+  const wantY=isDesk()?innerHeight/2+120:Math.min(340,innerHeight-bottomPad()-40);
+  const pt=map.project([m.lat,m.lng],z).add([isDesk()&&sheetState!=="closed"?-212:0,innerHeight/2-wantY]);
+  map.flyTo(map.unproject(pt,z),z,{duration:.8});
 }
 
 let qT;
 $("q").addEventListener("input",e=>{$("clear").hidden=!e.target.value;clearTimeout(qT);qT=setTimeout(()=>{state.q=e.target.value;listLimit=40;
-  if(state.q&&sheetState==="closed")setSheet("half");render(true)},200)});
+  if(state.q&&(sheetState==="closed"||sheetState==="mini"))setSheet("half");render(true)},200)});
 $("q").addEventListener("keydown",e=>{if(e.key==="Enter"){e.target.blur();if(sheetState==="closed"||sheetState==="mini")setSheet("half")}});
 $("clear").onclick=()=>{$("q").value="";$("clear").hidden=true;state.q="";listLimit=40;if(!you)setSheet("closed");render(!!you)};
 
@@ -337,6 +357,12 @@ function locate(){
     {enableHighAccuracy:true,maximumAge:30000,timeout:15000});
 }
 $("nearBtn").onclick=locate;
+/* share a masjid's location (WhatsApp etc. via the phone's share sheet; copies the link elsewhere) */
+map.on("popupopen",e=>{const b=e.popup.getElement().querySelector(".sh");if(!b)return;
+  b.onclick=async()=>{const m=masjids.find(x=>x.id===b.dataset.id);if(!m)return;
+    const text=m.name+", "+placeOf(m);
+    if(navigator.share){try{await navigator.share({title:m.name,text,url:viewUrl(m)})}catch(_){}return}
+    try{await navigator.clipboard.writeText(text+"\n"+viewUrl(m));toast("Location link copied")}catch(_){window.open(viewUrl(m),"_blank","noopener")}}});
 map.on("contextmenu",e=>{if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null}setYou(e.latlng.lat,e.latlng.lng,true);toast("Showing masjids nearest to this spot")});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&sheetState!=="closed")setSheet("closed")});
 addEventListener("resize",()=>{if(sheetState!=="closed")setSheet(sheetState)});
@@ -345,7 +371,7 @@ fetch("masjids.json").then(r=>r.json()).then(data=>{
   masjids=data;
   for(const m of masjids){const mk=L.marker([m.lat,m.lng],{icon:icon(false),title:m.name});
     mk.bindPopup(()=>popupHtml(m),{minWidth:285,maxWidth:320,autoPanPaddingTopLeft:[20,80],autoPanPaddingBottomRight:[20,20]});
-    mk.on("click",()=>{const prev=markers.get(selId);if(prev&&prev!==mk)prev.setIcon(icon(false));selId=m.id;mk.setIcon(icon(true));drawRoute(m)});
+    mk.on("click",()=>{if(selMk!==mk){liftSel(mk);mk.openPopup()}selId=m.id;drawRoute(m)});
     markers.set(m.id,mk)}
   render();
 }).catch(()=>toast("Couldn't load the masjid list. Check your connection and reload.",10000));
@@ -357,7 +383,7 @@ fetch("masjids.json").then(r=>r.json()).then(data=>{
 const CONTRIBUTE={channel:"gform",to:"https://docs.google.com/forms/d/e/1FAIpQLSfTQi10We5gx23Vwd-FIfW4EJTHnhAjkkFuevkI_T2KrG75cw/formResponse",
   fields:{name:"entry.603604614",area:"entry.1664891392",map:"entry.49671013"}};
 const sgLoc={lat:null,lng:null};let sheetBefore="closed";
-function openSuggest(){$("suggest").hidden=false;$("sgErr").hidden=true;
+function openSuggest(pre){$("suggest").hidden=false;$("sgErr").hidden=true;if(typeof pre==="string"&&pre&&!$("sgName").value)$("sgName").value=pre;
   $("sgFine").textContent=CONTRIBUTE.channel==="gform"?"Your request is sent privately for checking.":CONTRIBUTE.channel==="email"?"Opens your email app with your request ready to send.":"";
   setTimeout(()=>$("sgName").focus(),50)}
 function closeSuggest(){$("suggest").hidden=true}
