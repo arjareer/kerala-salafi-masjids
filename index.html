@@ -134,15 +134,6 @@ body.full .sheet{border-radius:0}
 .err{color:#b3261e;font-size:13px;margin:-4px 0 12px}
 .send{-webkit-appearance:none;appearance:none;width:100%;height:52px;border:0;border-radius:999px;background:var(--black);color:#fff;font-size:16px;font-weight:600;cursor:pointer;margin-top:4px}
 .fine{color:var(--muted);font-size:12.5px;text-align:center;margin:10px 0 0}
-/* pick-on-map mode */
-.crosshair,.pickbar,.pickhint{display:none}
-body.picking .leaflet-tile-pane{filter:none}
-body.picking .crosshair{display:block;position:fixed;z-index:650;left:50%;top:50%;width:34px;height:34px;margin:-42px 0 0 -17px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--accent);border:3px solid var(--gold);box-shadow:-3px 8px 16px rgba(11,40,25,.35);pointer-events:none}
-body.picking .pickhint{display:block;position:fixed;z-index:700;left:50%;transform:translateX(-50%);top:calc(74px + env(safe-area-inset-top));background:#fff;padding:10px 16px;border-radius:999px;font-size:14px;box-shadow:var(--shadow);white-space:nowrap}
-body.picking .pickbar{display:flex;gap:10px;position:fixed;z-index:700;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom))}
-body.picking .pickbar button{white-space:nowrap;height:50px;border-radius:999px;padding:0 22px;font-weight:600;font-size:15px;border:0;cursor:pointer;box-shadow:0 12px 28px rgba(11,40,25,.25)}
-body.picking .pickbar .ok{background:var(--black);color:#fff}body.picking .pickbar .no{background:#fff;color:var(--ink)}
-body.picking .sheet,body.picking #nearBtn,body.picking #mapBtn,body.picking #addBtn{visibility:hidden}
 @media (min-width:900px){.modal{align-items:center}.card{border-radius:var(--r-xl)}}
 .toast{position:fixed;z-index:800;left:50%;top:calc(74px + env(safe-area-inset-top));transform:translateX(-50%);background:rgba(34,34,34,.92);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 
@@ -177,9 +168,6 @@ body.picking .sheet,body.picking #nearBtn,body.picking #mapBtn,body.picking #add
   <ul class="list" id="list"></ul>
 </section>
 <div class="toast" id="toast" hidden></div>
-<div class="crosshair" aria-hidden="true"></div>
-<div class="pickhint" id="pickHint">Move the map so the pin is on the masjid</div>
-<div class="pickbar"><button class="no" id="pickCancel" type="button">Cancel</button><button class="ok" id="pickOk" type="button">Use this spot</button></div>
 
 <div class="modal" id="suggest" hidden role="dialog" aria-modal="true" aria-labelledby="sgTitle">
   <form class="card" id="sgForm" novalidate>
@@ -189,9 +177,9 @@ body.picking .sheet,body.picking #nearBtn,body.picking #mapBtn,body.picking #add
     <label class="field"><span>Masjid name</span><input id="sgName" autocomplete="off" placeholder="e.g. Salafi Juma Masjid, Tirur"></label>
     <label class="field"><span>Area / town</span><input id="sgArea" autocomplete="off" placeholder="e.g. Tirur, Malappuram"></label>
     <div class="field"><span>Location</span>
-      <div class="loc"><button class="obtn" id="sgPick" type="button">Pick on map</button><button class="obtn" id="sgHere" type="button">I'm at the masjid now</button></div>
-      <div class="locstate" id="sgLoc">No spot chosen yet</div></div>
-    <label class="field"><span>Google Maps link <i>(optional, instead of a spot)</i></span><input id="sgLink" type="url" inputmode="url" autocomplete="off" placeholder="Paste a link from Google Maps"></label>
+      <div class="loc"><button class="obtn" id="sgHere" type="button">I'm at the masjid now</button></div>
+      <div class="locstate" id="sgLoc">No location added yet</div></div>
+    <label class="field"><span>Google Maps link <i>(or use your location above)</i></span><input id="sgLink" type="url" inputmode="url" autocomplete="off" placeholder="Paste a link from Google Maps"></label>
     <p class="err" id="sgErr" hidden></p>
     <button class="send" type="submit" id="sgSend">Send request</button>
     <p class="fine" id="sgFine"></p>
@@ -384,54 +372,22 @@ fetch("masjids.json").then(r=>r.json()).then(data=>{
    The "Suggest a masjid" row stays hidden if channel is empty. */
 /* requests go by email to the finder's inbox through FormSubmit (no server or key; the inbox confirms once) */
 const CONTRIBUTE={channel:"email",to:"salafimasjidfinder@gmail.com"};
-const sgLoc={lat:null,lng:null};let sheetBefore="closed";
+const sgLoc={lat:null,lng:null};
 function openSuggest(pre){$("suggest").hidden=false;$("sgErr").hidden=true;if(typeof pre==="string"&&pre&&!$("sgName").value)$("sgName").value=pre;
   $("sgFine").textContent=CONTRIBUTE.channel?"Your request is sent privately for checking.":"";
   setTimeout(()=>$("sgName").focus(),50)}
 function closeSuggest(){$("suggest").hidden=true}
-function showLoc(){const ok=sgLoc.lat!=null;$("sgLoc").className="locstate"+(ok?" ok":"");$("sgLoc").textContent=ok?`✓ Spot chosen (${sgLoc.lat.toFixed(5)}, ${sgLoc.lng.toFixed(5)})`:"No spot chosen yet"}
+function showLoc(){const ok=sgLoc.lat!=null;$("sgLoc").className="locstate"+(ok?" ok":"");$("sgLoc").textContent=ok?`✓ Location added (${sgLoc.lat.toFixed(5)}, ${sgLoc.lng.toFixed(5)})`:"No location added yet"}
 $("sgClose").onclick=closeSuggest;
 $("addBtn").onclick=openSuggest;$("addBtn").hidden=!CONTRIBUTE.channel;
 $("suggest").addEventListener("click",e=>{if(e.target.id==="suggest")closeSuggest()});
-/* pick on map: satellite view so the masjid roof is visible, starting from where the masjid most likely is */
-const sat=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-  {maxZoom:20,maxNativeZoom:19,attribution:"Imagery &copy; Esri"});
-let pickMoved=false;
-function areaGuess(){
-  const t=($("sgArea").value+" "+$("sgName").value).toLowerCase().split(/[^a-z]+/).filter(w=>w.length>3);
-  if(!t.length)return null;
-  /* earlier words first: "Tirur, Malappuram" should land on Tirur, not Malappuram town */
-  for(const w of t){const re=new RegExp("\\b"+w+"\\b","i");const m=masjids.find(m=>(m.place||"").toLowerCase()===w)||masjids.find(m=>re.test(m.place||"")||re.test(m.name));if(m)return m}
-  return null;
-}
-function pickHint(t){$("pickHint").textContent=t}
-$("sgPick").onclick=()=>{closeSuggest();sheetBefore=sheetState;map.closePopup();document.body.classList.add("picking");
-  sat.addTo(map);pickMoved=false;pickHint("Move the map so the pin is on the masjid");
-  if(sgLoc.lat!=null){map.setView([sgLoc.lat,sgLoc.lng],18);return}
-  if(you){map.setView([you.lat,you.lng],18);return}
-  const g=areaGuess();
-  if(g)map.setView([g.lat,g.lng],15);else map.setView([10.6,76.3],8);
-  if(!navigator.geolocation){if(!g)pickHint("Zoom in and move the map to the masjid");return}
-  pickHint("Finding your location…");
-  navigator.geolocation.getCurrentPosition(p=>{
-      if(!document.body.classList.contains("picking"))return;
-      pickHint("Move the map so the pin is on the masjid");
-      if(!pickMoved)map.setView([p.coords.latitude,p.coords.longitude],18)},
-    ()=>pickHint(g?"Move the map so the pin is on the masjid":"Zoom in and move the map to the masjid"),
-    {enableHighAccuracy:true,timeout:10000,maximumAge:60000});
-  setTimeout(()=>map.once("dragstart zoomstart",()=>{pickMoved=true}),400);
-};
-function endPick(){document.body.classList.remove("picking");map.removeLayer(sat);openSuggest()}
-$("pickOk").onclick=()=>{const c=map.getCenter();
-  sgLoc.lat=+c.lat.toFixed(6);sgLoc.lng=+c.lng.toFixed(6);showLoc();endPick()};
-$("pickCancel").onclick=endPick;
-$("sgHere").onclick=()=>{if(!navigator.geolocation){$("sgLoc").textContent="Your browser can't share location. Use Pick on map.";return}
+$("sgHere").onclick=()=>{if(!navigator.geolocation){$("sgLoc").textContent="Your browser can't share location. Paste a Google Maps link instead.";return}
   $("sgLoc").className="locstate";$("sgLoc").textContent="Getting your location…";
   navigator.geolocation.getCurrentPosition(p=>{sgLoc.lat=+p.coords.latitude.toFixed(6);sgLoc.lng=+p.coords.longitude.toFixed(6);showLoc()},
-    ()=>{$("sgLoc").textContent="Couldn't get your location. Use Pick on map instead."},{enableHighAccuracy:true,timeout:15000})};
+    ()=>{$("sgLoc").textContent="Couldn't get your location. Paste a Google Maps link instead."},{enableHighAccuracy:true,timeout:15000})};
 $("sgForm").addEventListener("submit",e=>{e.preventDefault();
   const name=$("sgName").value.trim(),area=$("sgArea").value.trim(),link=$("sgLink").value.trim();
-  const miss=[!name&&"the masjid name",!area&&"the area",sgLoc.lat==null&&!link&&"the location (pick a spot or paste a Google Maps link)"].filter(Boolean);
+  const miss=[!name&&"the masjid name",!area&&"the area",sgLoc.lat==null&&!link&&"the location (use your location or paste a Google Maps link)"].filter(Boolean);
   if(miss.length){$("sgErr").textContent="Please add "+miss.join(", ").replace(/, ([^,]*)$/," and $1")+".";$("sgErr").hidden=false;return}
   const spot=sgLoc.lat!=null?"https://www.google.com/maps?q="+sgLoc.lat+","+sgLoc.lng:"";
   const text=["Masjid suggestion · Kerala Salafi Masjids","","Name: "+name,"Area: "+area,spot&&"Spot: "+spot,link&&"Link: "+link].filter(Boolean).join("\n");
@@ -445,7 +401,7 @@ $("sgForm").addEventListener("submit",e=>{e.preventDefault();
       fail();location.href="mailto:"+CONTRIBUTE.to+"?subject="+encodeURIComponent("Masjid suggestion: "+name)+"&body="+encodeURIComponent(text)})
   .finally(()=>{$("sgSend").disabled=false;$("sgSend").textContent="Send request"});
 });
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(document.body.classList.contains("picking"))endPick();else if(!$("suggest").hidden)closeSuggest()}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("suggest").hidden)closeSuggest()});
 
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
