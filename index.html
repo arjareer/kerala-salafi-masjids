@@ -390,15 +390,13 @@ $("sgForm").addEventListener("submit",e=>{e.preventDefault();
   const miss=[!name&&"the masjid name",!area&&"the area",sgLoc.lat==null&&!link&&"the location (use your location or paste a Google Maps link)"].filter(Boolean);
   if(miss.length){$("sgErr").textContent="Please add "+miss.join(", ").replace(/, ([^,]*)$/," and $1")+".";$("sgErr").hidden=false;return}
   const spot=sgLoc.lat!=null?"https://www.google.com/maps?q="+sgLoc.lat+","+sgLoc.lng:"";
-  const text=["Masjid suggestion · Kerala Salafi Masjids","","Name: "+name,"Area: "+area,spot&&"Spot: "+spot,link&&"Link: "+link].filter(Boolean).join("\n");
   const fail=()=>{$("sgErr").textContent="Couldn't send. Check your connection and try again.";$("sgErr").hidden=false};
   $("sgSend").disabled=true;$("sgSend").textContent="Sending…";
   fetch("https://formsubmit.co/ajax/"+CONTRIBUTE.to,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},
     body:JSON.stringify({_subject:"Masjid suggestion: "+name,_template:"table",_captcha:"false","Masjid name":name,"Area / town":area,"Spot on map":spot||"-","Google Maps link":link||"-"})})
   .then(r=>r.json()).then(j=>{if(String(j.success)!=="true")throw 0;
       closeSuggest();$("sgForm").reset();sgLoc.lat=sgLoc.lng=null;showLoc();toast("Thank you! Your suggestion was sent for checking.",5000)})
-  .catch(()=>{ /* fall back to the email app so nothing is lost */
-      fail();location.href="mailto:"+CONTRIBUTE.to+"?subject="+encodeURIComponent("Masjid suggestion: "+name)+"&body="+encodeURIComponent(text)})
+  .catch(fail)
   .finally(()=>{$("sgSend").disabled=false;$("sgSend").textContent="Send request"});
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("suggest").hidden)closeSuggest()});
