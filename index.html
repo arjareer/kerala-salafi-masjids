@@ -55,6 +55,18 @@ button,input,textarea{font:inherit;color:inherit}
 .fab svg{width:19px;height:19px;color:var(--gold)}
 .fab[hidden]{display:none}
 #mapBtn{height:46px;padding:0 20px;font-size:15px}
+/* Near me: the main action, so it's the biggest thing on screen (testers missed the small pill) */
+#nearBtn{height:58px;padding:0 30px;font-size:17px;font-weight:700;justify-content:center;white-space:nowrap;box-shadow:0 0 0 7px rgba(11,77,44,.13),0 16px 36px rgba(11,40,25,.32)}
+#nearBtn svg{width:21px;height:21px}
+@media (max-width:480px){#nearBtn{left:max(16px,env(safe-area-inset-left));right:84px;transform:none;padding:0 16px}}
+/* first visit: ask for location once */
+.welcome .card{padding-top:24px}
+.welcome .badge{width:56px;height:56px;border-radius:18px;background:var(--accent-soft);color:var(--black);display:grid;place-items:center;margin-bottom:14px}
+.welcome .badge svg{width:28px;height:28px}
+.welcome .lead{font-size:15px;margin:2px 0 20px}
+.welcome .send{height:56px;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px}
+.welcome .send svg{width:20px;height:20px;color:var(--gold)}
+.later{-webkit-appearance:none;appearance:none;display:block;width:100%;border:0;background:none;margin-top:8px;padding:12px;font:600 15px var(--font);color:var(--ink);cursor:pointer}
 .addbtn{-webkit-appearance:none;appearance:none;position:fixed;z-index:650;right:max(16px,env(safe-area-inset-right));bottom:calc(24px + env(safe-area-inset-bottom));height:52px;min-width:52px;padding:0 16px;border:1px solid var(--gold);border-radius:999px;background:#fff;color:var(--black);display:flex;align-items:center;justify-content:center;gap:6px;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 12px 28px rgba(11,40,25,.18)}
 .addbtn svg{width:20px;height:20px;flex:none}
 .addbtn[hidden]{display:none}
@@ -154,7 +166,7 @@ body.full .sheet{border-radius:0}
   <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search masjid or place" autocomplete="off" enterkeyhint="search" aria-label="Search masjid or place"><button class="clear" id="clear" type="button" aria-label="Clear search" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></label>
 </div>
 
-<button class="fab" id="nearBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Near me</button>
+<button class="fab" id="nearBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Find masjids near me</button>
 <button class="fab" id="mapBtn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>Map</button>
 
 <button class="addbtn" id="addBtn" type="button" aria-label="Suggest a masjid" title="Suggest a masjid" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>Suggest a masjid</span></button>
@@ -168,6 +180,16 @@ body.full .sheet{border-radius:0}
   <ul class="list" id="list"></ul>
 </section>
 <div class="toast" id="toast" hidden></div>
+
+<div class="modal welcome" id="welcome" hidden role="dialog" aria-modal="true" aria-labelledby="wTitle">
+  <div class="card">
+    <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
+    <h2 id="wTitle">Find the nearest masjid</h2>
+    <p class="lead">Share your location to see Salafi masjids around you, nearest first. It stays on your phone.</p>
+    <button class="send" id="wGo" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Use my location</button>
+    <button class="later" id="wLater" type="button">Not now, I'll browse the map</button>
+  </div>
+</div>
 
 <div class="modal" id="suggest" hidden role="dialog" aria-modal="true" aria-labelledby="sgTitle">
   <form class="card" id="sgForm" novalidate>
@@ -347,6 +369,15 @@ function locate(){
     {enableHighAccuracy:true,maximumAge:30000,timeout:15000});
 }
 $("nearBtn").onclick=locate;
+/* first visit: ask once; either answer means we never show it again (Near me stays on the map) */
+(()=>{const K="seenWelcome";let seen=false;try{seen=!!localStorage.getItem(K)}catch(_){}
+  if(seen)return;
+  const done=()=>{$("welcome").hidden=true;try{localStorage.setItem(K,"1")}catch(_){}};
+  $("welcome").hidden=false;
+  $("wGo").onclick=()=>{done();locate()};
+  $("wLater").onclick=done;
+  $("welcome").addEventListener("click",e=>{if(e.target.id==="welcome")done()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("welcome").hidden)done()});})();
 /* share a masjid's location (WhatsApp etc. via the phone's share sheet; copies the link elsewhere) */
 map.on("popupopen",e=>{const b=e.popup.getElement().querySelector(".sh");if(!b)return;
   b.onclick=async()=>{const m=masjids.find(x=>x.id===b.dataset.id);if(!m)return;
