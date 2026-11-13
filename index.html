@@ -22,7 +22,7 @@
   /* Wimbledon palette: white first, deep green, a whisper of muted champagne gold. No saffron/orange anywhere. */
   --ink:#1b2a22; --muted:#7c857f; --line:#eeefea;
   --glass:rgba(255,255,255,.95); --bg:#fafaf7;
-  --black:#0b4d2c; --accent:#2e6b46; --accent-soft:#e9f1eb; --gold:#b49f68; --gold-soft:#f4f0e4; --you:#3d8bff;
+  --black:#0b4d2c; --accent:#2e6b46; --accent-soft:#e9f1eb; --gold:#b49f68; --gold-soft:#f4f0e4; --you:#3d8bff; --cta:#1a73e8;
   --r-xl:28px; --r-lg:20px;
   --shadow:0 18px 40px rgba(11,40,25,.10),0 2px 8px rgba(11,40,25,.06);
   --font:"Nunito Sans",-apple-system,"SF Pro Text",system-ui,sans-serif;
@@ -56,16 +56,16 @@ button,input,textarea{font:inherit;color:inherit}
 .fab[hidden]{display:none}
 #mapBtn{height:46px;padding:0 20px;font-size:15px}
 /* Near me: the main action, so it's the biggest thing on screen (testers missed the small pill) */
-#nearBtn{height:58px;padding:0 30px;font-size:17px;font-weight:700;justify-content:center;white-space:nowrap;box-shadow:0 0 0 7px rgba(11,77,44,.13),0 16px 36px rgba(11,40,25,.32)}
-#nearBtn svg{width:21px;height:21px}
+#nearBtn{height:58px;padding:0 30px;font-size:17px;font-weight:700;justify-content:center;white-space:nowrap;background:var(--cta);box-shadow:0 0 0 7px rgba(26,115,232,.16),0 16px 36px rgba(26,115,232,.38)}
+#nearBtn svg{width:21px;height:21px;color:#fff}
 @media (max-width:480px){#nearBtn{left:max(16px,env(safe-area-inset-left));right:84px;transform:none;padding:0 16px}}
 /* first visit: ask for location once */
 .welcome .card{padding-top:24px}
 .welcome .badge{width:56px;height:56px;border-radius:18px;background:var(--accent-soft);color:var(--black);display:grid;place-items:center;margin-bottom:14px}
 .welcome .badge svg{width:28px;height:28px}
 .welcome .lead{font-size:15px;margin:2px 0 20px}
-.welcome .send{height:56px;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px}
-.welcome .send svg{width:20px;height:20px;color:var(--gold)}
+.welcome .send{background:var(--cta);box-shadow:0 12px 28px rgba(26,115,232,.32);height:56px;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px}
+.welcome .send svg{width:20px;height:20px;color:#fff}
 .later{-webkit-appearance:none;appearance:none;display:block;width:100%;border:0;background:none;margin-top:8px;padding:12px;font:600 15px var(--font);color:var(--ink);cursor:pointer}
 .addbtn{-webkit-appearance:none;appearance:none;position:fixed;z-index:650;right:max(16px,env(safe-area-inset-right));bottom:calc(24px + env(safe-area-inset-bottom));height:52px;min-width:52px;padding:0 16px;border:1px solid var(--gold);border-radius:999px;background:#fff;color:var(--black);display:flex;align-items:center;justify-content:center;gap:6px;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 12px 28px rgba(11,40,25,.18)}
 .addbtn svg{width:20px;height:20px;flex:none}
