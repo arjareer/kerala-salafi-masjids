@@ -14,7 +14,7 @@
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&family=Noto+Sans+Malayalam:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&family=Noto+Sans+Malayalam:wght@400;500;600;700&display=swap">
 <style>
 /* Layout (Google Maps style): full-screen map with a search bar and one "Near me" button.
    Near me or a search slides up a list sheet: mini (header only) / half / full screen, or closed. */
@@ -25,7 +25,7 @@
   --black:#0b4d2c; --accent:#2e6b46; --accent-soft:#e9f1eb; --gold:#b49f68; --gold-soft:#f4f0e4; --you:#3d8bff; --cta:#1a73e8;
   --r-xl:28px; --r-lg:20px;
   --shadow:0 18px 40px rgba(11,40,25,.10),0 2px 8px rgba(11,40,25,.06);
-  --font:"Nunito Sans",-apple-system,"SF Pro Text",system-ui,sans-serif;
+  --font:"Nunito Sans","Noto Sans Malayalam",-apple-system,"SF Pro Text",system-ui,sans-serif;
   --ml:"Noto Sans Malayalam","Nunito Sans",sans-serif;
   --top:calc(70px + env(safe-area-inset-top));
 }
@@ -49,6 +49,19 @@ button,input,textarea{font:inherit;color:inherit}
 .search>svg{width:18px;height:18px;color:var(--ink);flex:none}
 .clear{-webkit-appearance:none;appearance:none;padding:0;line-height:0;border:0;background:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
 .clear[hidden]{display:none}
+/* language switch: a small quiet pill in the search bar (and on the welcome card) */
+.lang{-webkit-appearance:none;appearance:none;flex:none;height:34px;padding:0 12px;border:1px solid #dddddd;border-radius:999px;background:#fff;color:var(--ink);font:700 13px/1 var(--font);cursor:pointer;white-space:nowrap}
+.lang:hover{border-color:var(--ink)}
+.welcome .card{position:relative}
+.welcome .lang{position:absolute;top:20px;right:20px}
+/* Malayalam script runs wider and taller than Latin: a touch smaller, more line height, no thin weights */
+html[lang=ml] .search input{font-size:15px}
+html[lang=ml] .head h2,html[lang=ml] .card h2,html[lang=ml] .pop h3{font-weight:500}
+html[lang=ml] .head h2{font-size:21px}
+html[lang=ml] .card h2{font-size:21px}
+html[lang=ml] #nearBtn{font-size:16px}
+html[lang=ml] .welcome .send{font-size:16px}
+html[lang=ml] .lead,html[lang=ml] .empty,html[lang=ml] .row .sub{line-height:1.6}
 
 /* floating pill buttons */
 .fab{position:fixed;z-index:650;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom));height:52px;padding:0 26px;border:0;border-radius:999px;background:var(--black);color:#fff;font-size:16px;font-weight:600;letter-spacing:.01em;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 16px 36px rgba(11,40,25,.32)}
@@ -94,7 +107,7 @@ body.full .sheet{border-radius:0}
 .row .info{flex:1;min-width:0}
 .row h3{margin:0;font-size:16px;font-weight:600;line-height:1.3;letter-spacing:-.005em}
 .row .sub{margin-top:6px;color:var(--muted);font-size:14px;display:flex;align-items:center;gap:8px}
-.row .sub b{background:var(--accent);color:#fff;font-weight:600;font-size:12.5px;padding:2px 8px;border-radius:5px;box-shadow:0 4px 10px rgba(46,107,70,.3)}
+.row .sub b{white-space:nowrap;background:var(--accent);color:#fff;font-weight:600;font-size:12.5px;padding:2px 8px;border-radius:5px;box-shadow:0 4px 10px rgba(46,107,70,.3)}
 .dir{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--accent);box-shadow:0 8px 20px rgba(11,40,25,.12)}
 .dir svg{width:20px;height:20px}
 .empty{text-align:center;color:var(--muted);padding:28px 24px 20px;font-size:14px;border-bottom:1px solid var(--line)}
@@ -163,19 +176,19 @@ body.full .sheet{border-radius:0}
 <div id="map" aria-label="Street map"></div>
 
 <div class="top">
-  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search masjid or place" autocomplete="off" enterkeyhint="search" aria-label="Search masjid or place"><button class="clear" id="clear" type="button" aria-label="Clear search" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></label>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search masjid or place" autocomplete="off" enterkeyhint="search" aria-label="Search masjid or place" data-t-ph="search"><button class="clear" id="clear" type="button" aria-label="Clear search" data-t-aria="clearSearch" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button class="lang" type="button" data-lang-toggle></button></label>
 </div>
 
-<button class="fab" id="nearBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Find masjids near me</button>
-<button class="fab" id="mapBtn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>Map</button>
+<button class="fab" id="nearBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg><span data-t="nearMe">Find masjids near me</span></button>
+<button class="fab" id="mapBtn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg><span data-t="map">Map</span></button>
 
-<button class="addbtn" id="addBtn" type="button" aria-label="Suggest a masjid" title="Suggest a masjid" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>Suggest a masjid</span></button>
+<button class="addbtn" id="addBtn" type="button" aria-label="Suggest a masjid" title="Suggest a masjid" data-t-aria="suggest" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span data-t="suggest">Suggest a masjid</span></button>
 
-<section class="sheet" id="sheet" aria-label="Masjid list">
+<section class="sheet" id="sheet" aria-label="Masjid list" data-t-aria="listLabel">
   <div class="grip" id="grip">
     <i></i>
     <div class="head"><div><h2 id="title">Nearest masjids</h2><p id="subtitle"></p></div>
-      <button class="x" id="closeBtn" type="button" aria-label="Close list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <button class="x" id="closeBtn" type="button" aria-label="Close list" data-t-aria="closeList"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   </div>
   <ul class="list" id="list"></ul>
 </section>
@@ -183,27 +196,28 @@ body.full .sheet{border-radius:0}
 
 <div class="modal welcome" id="welcome" hidden role="dialog" aria-modal="true" aria-labelledby="wTitle">
   <div class="card">
+    <button class="lang" type="button" data-lang-toggle></button>
     <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
-    <h2 id="wTitle">Find the nearest masjid</h2>
-    <p class="lead">Share your location to see Salafi masjids around you, nearest first. It stays on your phone.</p>
-    <button class="send" id="wGo" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Use my location</button>
-    <button class="later" id="wLater" type="button">Not now, I'll browse the map</button>
+    <h2 id="wTitle" data-t="wTitle">Find the nearest masjid</h2>
+    <p class="lead" data-t="wLead">Share your location to see Salafi masjids around you, nearest first. It stays on your phone.</p>
+    <button class="send" id="wGo" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg><span data-t="wGo">Use my location</span></button>
+    <button class="later" id="wLater" type="button" data-t="wLater">Not now, I'll browse the map</button>
   </div>
 </div>
 
 <div class="modal" id="suggest" hidden role="dialog" aria-modal="true" aria-labelledby="sgTitle">
   <form class="card" id="sgForm" novalidate>
-    <div class="top-row"><div><h2 id="sgTitle">Suggest a masjid</h2></div>
-      <button class="x" id="sgClose" type="button" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-    <p class="lead">Know a Salafi masjid that's missing? Send it in. It's checked before it appears on the map.</p>
-    <label class="field"><span>Masjid name</span><input id="sgName" autocomplete="off" placeholder="e.g. Salafi Juma Masjid, Tirur"></label>
-    <label class="field"><span>Area / town</span><input id="sgArea" autocomplete="off" placeholder="e.g. Tirur, Malappuram"></label>
-    <div class="field"><span>Location</span>
-      <div class="loc"><button class="obtn" id="sgHere" type="button">I'm at the masjid now</button></div>
+    <div class="top-row"><div><h2 id="sgTitle" data-t="suggest">Suggest a masjid</h2></div>
+      <button class="x" id="sgClose" type="button" aria-label="Close" data-t-aria="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <p class="lead" data-t="sgLead">Know a Salafi masjid that's missing? Send it in. It's checked before it appears on the map.</p>
+    <label class="field"><span data-t="sgName">Masjid name</span><input id="sgName" autocomplete="off" data-t-ph="sgNamePh" placeholder="e.g. Salafi Juma Masjid, Tirur"></label>
+    <label class="field"><span data-t="sgArea">Area / town</span><input id="sgArea" autocomplete="off" data-t-ph="sgAreaPh" placeholder="e.g. Tirur, Malappuram"></label>
+    <div class="field"><span data-t="sgLocLbl">Location</span>
+      <div class="loc"><button class="obtn" id="sgHere" type="button" data-t="sgHere">I'm at the masjid now</button></div>
       <div class="locstate" id="sgLoc">No location added yet</div></div>
-    <label class="field"><span>Google Maps link <i>(or use your location above)</i></span><input id="sgLink" type="url" inputmode="url" autocomplete="off" placeholder="Paste a link from Google Maps"></label>
+    <label class="field"><span><b data-t="sgLink" style="font-weight:inherit">Google Maps link</b> <i data-t="sgLinkHint">(or use your location above)</i></span><input id="sgLink" type="url" inputmode="url" autocomplete="off" data-t-ph="sgLinkPh" placeholder="Paste a link from Google Maps"></label>
     <p class="err" id="sgErr" hidden></p>
-    <button class="send" type="submit" id="sgSend">Send request</button>
+    <button class="send" type="submit" id="sgSend" data-t="send">Send request</button>
     <p class="fine" id="sgFine"></p>
   </form>
 </div>
@@ -212,6 +226,91 @@ body.full .sheet{border-radius:0}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script>
 const $=id=>document.getElementById(id);
+
+/* ---- English / Malayalam. The choice is remembered on this phone (localStorage "lang").
+   Masjid names and towns stay as in masjids.json; district names are translated. ---- */
+const T={
+en:{toggle:"മലയാളം",toggleAria:"മലയാളത്തിലേക്ക് മാറുക (Switch to Malayalam)",docTitle:"Kerala Salafi Masjids",
+  search:"Search masjid or place",clearSearch:"Clear search",nearMe:"Find masjids near me",map:"Map",suggest:"Suggest a masjid",
+  listLabel:"Masjid list",closeList:"Close list",close:"Close",
+  nearest:"Nearest masjids",results:"Results",all:"Salafi masjids",noMatches:"No matches",
+  countQ:(n,y)=>`${n} masjid${n===1?"":"s"}${y?" · nearest first":""}`,countNear:n=>`${n} masjids · nearest first`,countAll:n=>`${n} across Kerala`,
+  emptyT:q=>`No masjid called “${q}” yet`,emptyB:"Check the spelling or try the town name. If it's missing, suggest it below so others can find it.",
+  emptyMl:"Masjid names are listed in English, so try typing the name in English.",
+  sgMissing:"Missing a masjid?",sgCant:"Can't find it?",sgOne:"Suggest one",sgChecked:"It's checked before it's added",
+  more:"Show more",dirTo:n=>`Directions to ${n}`,away:"away",dirs:"Directions",share:"Share",
+  m:"m",km:"km",
+  noGeo:"Your browser can't share location. Long-press (or right-click) the map where you are.",
+  finding:"Finding your location…",
+  blocked:"Location is blocked. Allow it in browser settings, or long-press (or right-click) the map where you are.",
+  noLoc:"Couldn't get your location. Long-press (or right-click) the map where you are.",
+  copied:"Location link copied",thisSpot:"Showing masjids nearest to this spot",
+  loadFail:"Couldn't load the masjid list. Check your connection and reload.",
+  wTitle:"Find the nearest masjid",wLead:"Share your location to see Salafi masjids around you, nearest first. It stays on your phone.",
+  wGo:"Use my location",wLater:"Not now, I'll browse the map",
+  sgLead:"Know a Salafi masjid that's missing? Send it in. It's checked before it appears on the map.",
+  sgName:"Masjid name",sgNamePh:"e.g. Salafi Juma Masjid, Tirur",sgArea:"Area / town",sgAreaPh:"e.g. Tirur, Malappuram",
+  sgLocLbl:"Location",sgHere:"I'm at the masjid now",sgNoLoc:"No location added yet",sgLocOk:"✓ Location added",
+  sgLink:"Google Maps link",sgLinkHint:"(or use your location above)",sgLinkPh:"Paste a link from Google Maps",
+  send:"Send request",sending:"Sending…",sgFine:"Your request is sent privately for checking.",
+  sgGetting:"Getting your location…",sgNoGeo:"Your browser can't share location. Paste a Google Maps link instead.",
+  sgGeoFail:"Couldn't get your location. Paste a Google Maps link instead.",
+  needName:"the masjid name",needArea:"the area",needLoc:"the location (use your location or paste a Google Maps link)",
+  pleaseAdd:l=>"Please add "+l.join(", ").replace(/, ([^,]*)$/," and $1")+".",
+  sendFail:"Couldn't send. Check your connection and try again.",thanks:"Thank you! Your suggestion was sent for checking."},
+ml:{toggle:"English",toggleAria:"Switch to English (ഇംഗ്ലീഷിലേക്ക് മാറുക)",docTitle:"കേരള സലഫി മസ്ജിദുകൾ",
+  search:"മസ്ജിദോ സ്ഥലമോ തിരയുക",clearSearch:"തിരയൽ മായ്ക്കുക",nearMe:"അടുത്തുള്ള മസ്ജിദുകൾ",map:"മാപ്പ്",suggest:"മസ്ജിദ് നിർദ്ദേശിക്കുക",
+  listLabel:"മസ്ജിദ് പട്ടിക",closeList:"പട്ടിക അടയ്ക്കുക",close:"അടയ്ക്കുക",
+  nearest:"അടുത്തുള്ള മസ്ജിദുകൾ",results:"തിരച്ചിൽ ഫലങ്ങൾ",all:"സലഫി മസ്ജിദുകൾ",noMatches:"ഒന്നും കണ്ടെത്തിയില്ല",
+  countQ:(n,y)=>`${n} മസ്ജിദുകൾ${y?" · അടുത്തുള്ളത് ആദ്യം":""}`,countNear:n=>`${n} മസ്ജിദുകൾ · അടുത്തുള്ളത് ആദ്യം`,countAll:n=>`കേരളത്തിലുടനീളം ${n} മസ്ജിദുകൾ`,
+  emptyT:q=>`“${q}” എന്ന പേരിൽ മസ്ജിദ് ഇതുവരെ ഇല്ല`,emptyB:"സ്പെല്ലിംഗ് ശരിയാണോ എന്ന് നോക്കൂ, അല്ലെങ്കിൽ സ്ഥലപ്പേര് തിരയൂ. ഈ മസ്ജിദ് ഇല്ലെങ്കിൽ, മറ്റുള്ളവർക്കും കണ്ടെത്താൻ താഴെ നിർദ്ദേശിക്കൂ.",
+  emptyMl:"മസ്ജിദുകളുടെ പേരുകൾ ഇംഗ്ലീഷിലാണ്, അതിനാൽ പേര് ഇംഗ്ലീഷിൽ ടൈപ്പ് ചെയ്ത് നോക്കൂ.",
+  sgMissing:"ഏതെങ്കിലും മസ്ജിദ് വിട്ടുപോയോ?",sgCant:"കണ്ടെത്താനായില്ലേ?",sgOne:"നിർദ്ദേശിക്കൂ",sgChecked:"പരിശോധിച്ച ശേഷമേ ചേർക്കൂ",
+  more:"കൂടുതൽ കാണിക്കുക",dirTo:n=>`${n}: വഴി`,away:"അകലെ",dirs:"വഴി",share:"ഷെയർ",
+  m:"മീ",km:"കി.മീ",
+  noGeo:"നിങ്ങളുടെ ബ്രൗസറിന് ലൊക്കേഷൻ നൽകാനാവില്ല. നിങ്ങൾ ഉള്ള സ്ഥലത്ത് മാപ്പിൽ അമർത്തിപ്പിടിക്കുക.",
+  finding:"നിങ്ങളുടെ ലൊക്കേഷൻ കണ്ടെത്തുന്നു…",
+  blocked:"ലൊക്കേഷൻ തടഞ്ഞിരിക്കുന്നു. ബ്രൗസർ സെറ്റിംഗ്സിൽ അനുവദിക്കുക, അല്ലെങ്കിൽ നിങ്ങൾ ഉള്ള സ്ഥലത്ത് മാപ്പിൽ അമർത്തിപ്പിടിക്കുക.",
+  noLoc:"ലൊക്കേഷൻ കിട്ടിയില്ല. നിങ്ങൾ ഉള്ള സ്ഥലത്ത് മാപ്പിൽ അമർത്തിപ്പിടിക്കുക.",
+  copied:"ലൊക്കേഷൻ ലിങ്ക് കോപ്പി ചെയ്തു",thisSpot:"ഈ സ്ഥലത്തിന് അടുത്തുള്ള മസ്ജിദുകൾ",
+  loadFail:"മസ്ജിദ് പട്ടിക ലോഡ് ആയില്ല. കണക്ഷൻ നോക്കി വീണ്ടും തുറക്കുക.",
+  wTitle:"ഏറ്റവും അടുത്തുള്ള മസ്ജിദ്",wLead:"ലൊക്കേഷൻ നൽകിയാൽ ചുറ്റുമുള്ള സലഫി മസ്ജിദുകൾ, ഏറ്റവും അടുത്തുള്ളത് ആദ്യം കാണാം. ലൊക്കേഷൻ നിങ്ങളുടെ ഫോണിൽ മാത്രം.",
+  wGo:"ലൊക്കേഷൻ ഉപയോഗിക്കുക",wLater:"ഇപ്പോൾ വേണ്ട, മാപ്പ് നോക്കാം",
+  sgLead:"പട്ടികയിൽ ഇല്ലാത്ത സലഫി മസ്ജിദ് അറിയാമോ? അയച്ചുതരൂ. പരിശോധിച്ച ശേഷമേ മാപ്പിൽ ചേർക്കൂ.",
+  sgName:"മസ്ജിദിന്റെ പേര്",sgNamePh:"ഉദാ: Salafi Juma Masjid, Tirur",sgArea:"സ്ഥലം / ടൗൺ",sgAreaPh:"ഉദാ: Tirur, Malappuram",
+  sgLocLbl:"ലൊക്കേഷൻ",sgHere:"ഞാൻ ഇപ്പോൾ മസ്ജിദിലാണ്",sgNoLoc:"ലൊക്കേഷൻ ഇതുവരെ ചേർത്തിട്ടില്ല",sgLocOk:"✓ ലൊക്കേഷൻ ചേർത്തു",
+  sgLink:"Google Maps ലിങ്ക്",sgLinkHint:"(അല്ലെങ്കിൽ മുകളിലെ ലൊക്കേഷൻ)",sgLinkPh:"Google Maps ലിങ്ക് പേസ്റ്റ് ചെയ്യുക",
+  send:"അയയ്ക്കുക",sending:"അയയ്ക്കുന്നു…",sgFine:"നിങ്ങളുടെ നിർദ്ദേശം പരിശോധനയ്ക്കായി സ്വകാര്യമായി അയയ്ക്കും.",
+  sgGetting:"ലൊക്കേഷൻ എടുക്കുന്നു…",sgNoGeo:"നിങ്ങളുടെ ബ്രൗസറിന് ലൊക്കേഷൻ നൽകാനാവില്ല. പകരം Google Maps ലിങ്ക് പേസ്റ്റ് ചെയ്യുക.",
+  sgGeoFail:"ലൊക്കേഷൻ കിട്ടിയില്ല. പകരം Google Maps ലിങ്ക് പേസ്റ്റ് ചെയ്യുക.",
+  needName:"മസ്ജിദിന്റെ പേര്",needArea:"സ്ഥലം",needLoc:"ലൊക്കേഷൻ (മുകളിലെ ബട്ടൺ, അല്ലെങ്കിൽ Google Maps ലിങ്ക്)",
+  pleaseAdd:l=>l.join(", ")+" ചേർക്കുക.",
+  sendFail:"അയയ്ക്കാനായില്ല. കണക്ഷൻ നോക്കി വീണ്ടും ശ്രമിക്കുക.",thanks:"നന്ദി! നിങ്ങളുടെ നിർദ്ദേശം പരിശോധനയ്ക്കായി അയച്ചു."}};
+const DIST_ML={"Malappuram":"മലപ്പുറം","Kozhikode":"കോഴിക്കോട്","Palakkad":"പാലക്കാട്","Kannur":"കണ്ണൂർ","Ernakulam":"എറണാകുളം",
+  "Kasaragod":"കാസർകോട്","Thrissur":"തൃശ്ശൂർ","Wayanad":"വയനാട്","Kollam":"കൊല്ലം","Alappuzha":"ആലപ്പുഴ","Thiruvananthapuram":"തിരുവനന്തപുരം",
+  "Idukki":"ഇടുക്കി","Kottayam":"കോട്ടയം","Pathanamthitta":"പത്തനംതിട്ട","Dakshina Kannada (Karnataka)":"ദക്ഷിണ കന്നഡ (കർണാടക)",
+  "Nilgiris (Tamil Nadu)":"നീലഗിരി (തമിഴ്നാട്)"};
+let lang="en";
+try{const s=localStorage.getItem("lang");lang=s==="ml"||s==="en"?s:(/^ml\b/i.test(navigator.language||"")?"ml":"en")}catch(_){}
+const t=k=>T[lang][k]??T.en[k];
+const distName=d=>lang==="ml"&&DIST_ML[d]||d;
+function applyLang(){
+  document.documentElement.lang=lang;document.title=t("docTitle");
+  document.querySelectorAll("[data-t]").forEach(e=>e.textContent=t(e.dataset.t));
+  document.querySelectorAll("[data-t-ph]").forEach(e=>e.placeholder=t(e.dataset.tPh));
+  document.querySelectorAll("[data-t-aria]").forEach(e=>{e.setAttribute("aria-label",t(e.dataset.tAria));if(e.title)e.title=t(e.dataset.tAria)});
+  document.querySelectorAll("[data-lang-toggle]").forEach(b=>{b.textContent=t("toggle");b.setAttribute("aria-label",t("toggleAria"));b.lang=lang==="en"?"ml":"en"});
+}
+function setLang(l){
+  lang=l;try{localStorage.setItem("lang",l)}catch(_){}
+  applyLang();
+  if(typeof render==="function"&&masjids.length){render(false,true);
+    if(selMk){const m=masjids.find(x=>x.id===selId);if(m)drawRoute(m);if(selMk.isPopupOpen()){selMk.closePopup();selMk.openPopup()}}}
+  if(typeof showLoc==="function")showLoc();
+  if(typeof CONTRIBUTE!=="undefined"&&!$("suggest").hidden)$("sgFine").textContent=CONTRIBUTE.channel?t("sgFine"):"";
+}
+document.querySelectorAll("[data-lang-toggle]").forEach(b=>b.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();setLang(lang==="en"?"ml":"en")}));
+applyLang();
 const state={q:""};
 let masjids=[],you=null,selId=null,listLimit=40,youMarker=null,watchId=null,sheetState="closed";
 const isDesk=()=>matchMedia("(min-width:900px)").matches;
@@ -231,9 +330,9 @@ const icon=sel=>L.divIcon({className:"",html:`<div class="mk${sel?" sel":""}">${
 
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function km(a,b){const R=6371,t=Math.PI/180,dLat=(b.lat-a.lat)*t,dLng=(b.lng-a.lng)*t;const h=Math.sin(dLat/2)**2+Math.cos(a.lat*t)*Math.cos(b.lat*t)*Math.sin(dLng/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
-function fmtKm(d){return d<1?Math.round(d*1000)+" m":(d<10?d.toFixed(1):Math.round(d))+" km"}
+function fmtKm(d){return d<1?Math.round(d*1000)+" "+t("m"):(d<10?d.toFixed(1):Math.round(d))+" "+t("km")}
 const dirUrl=m=>`https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}`;
-const placeOf=m=>m.place&&m.place.toLowerCase()!==String(m.district).toLowerCase()?m.place+", "+m.district:(m.place||m.district);
+const placeOf=m=>m.place&&m.place.toLowerCase()!==String(m.district).toLowerCase()?m.place+", "+distName(m.district):(distName(m.district)||m.place);
 const viewUrl=m=>`https://www.google.com/maps/search/?api=1&query=${m.lat},${m.lng}`;
 function toast(t,ms=3500){const n=$("toast");n.textContent=t;n.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>n.hidden=true,ms)}
 
@@ -268,7 +367,7 @@ $("mapBtn").onclick=()=>setSheet("mini");
 
 function filtered(){
   const q=state.q.toLowerCase().trim();
-  const r=masjids.filter(m=>!q||(m.name+" "+m.place+" "+m.district).toLowerCase().includes(q));
+  const r=masjids.filter(m=>!q||(m.name+" "+m.place+" "+m.district+" "+(DIST_ML[m.district]||"")).toLowerCase().includes(q));
   if(you){r.forEach(m=>m._d=km(you,m));r.sort((a,b)=>a._d-b._d)}
   else r.sort((a,b)=>a.district.localeCompare(b.district)||a.name.localeCompare(b.name));
   return r;
@@ -288,31 +387,31 @@ function clearSel(){
 function render(fit,keepMarkers){
   const r=filtered();
   if(!keepMarkers){clearSel();shown=new Set(r.map(m=>markers.get(m.id)));cluster.clearLayers();cluster.addLayers([...shown])}
-  $("title").textContent=state.q?"Results":(you?"Nearest masjids":"Salafi masjids");
-  $("subtitle").textContent=state.q&&!r.length?"No matches":state.q?`${r.length} masjid${r.length===1?"":"s"}${you?" · nearest first":""}`:(you?`${r.length} masjids · nearest first`:`${r.length} across Kerala`);
+  $("title").textContent=state.q?t("results"):(you?t("nearest"):t("all"));
+  $("subtitle").textContent=state.q&&!r.length?t("noMatches"):state.q?t("countQ")(r.length,!!you):(you?t("countNear")(r.length):t("countAll")(r.length));
   const list=$("list");list.replaceChildren();
-  if(!r.length)list.innerHTML=`<li class="empty"><strong>No masjid called “${esc(state.q.trim())}” yet</strong>Check the spelling or try the town name. If it's missing, suggest it below so others can find it.</li>`;
+  if(!r.length)list.innerHTML=`<li class="empty"><strong>${esc(t("emptyT")(state.q.trim()))}</strong>${/[\u0D00-\u0D7F]/.test(state.q)?esc(t("emptyMl")):esc(t("emptyB"))}</li>`;
   const sg=document.createElement("li");sg.className="suggest-row";sg.tabIndex=0;sg.setAttribute("role","button");
-  sg.innerHTML=`<span class="plus">+</span><span>${r.length?"Missing a masjid?":"Can't find it?"} Suggest one<small>It's checked before it's added</small></span>`;
+  sg.innerHTML=`<span class="plus">+</span><span>${esc(r.length?t("sgMissing"):t("sgCant"))} ${esc(t("sgOne"))}<small>${esc(t("sgChecked"))}</small></span>`;
   const pre=r.length?"":state.q.trim();
   sg.onclick=()=>openSuggest(pre);sg.onkeydown=e=>{if(e.key==="Enter")openSuggest(pre)};
   for(const m of r.slice(0,listLimit)){
     const li=document.createElement("li");li.className="row"+(m.id===selId?" sel":"");li.dataset.id=m.id;li.tabIndex=0;li.setAttribute("role","button");
     const where=esc(placeOf(m));
     li.innerHTML=`<div class="info"><h3>${esc(m.name)}</h3><div class="sub">${you?`<b>${fmtKm(m._d)}</b>`:""}${where}</div></div>
-      <a class="dir" href="${dirUrl(m)}" target="_blank" rel="noopener" aria-label="Directions to ${esc(m.name)}">${DIR}</a>`;
+      <a class="dir" href="${dirUrl(m)}" target="_blank" rel="noopener" aria-label="${esc(t("dirTo")(m.name))}">${DIR}</a>`;
     li.onclick=e=>{if(e.target.closest(".dir"))return;select(m.id)};
     li.onkeydown=e=>{if(e.key==="Enter")select(m.id)};
     list.append(li);
   }
-  if(r.length>listLimit){const li=document.createElement("li");li.innerHTML=`<button class="more" type="button">Show more</button>`;li.firstChild.onclick=()=>{listLimit+=60;render(false,true)};list.append(li)}
+  if(r.length>listLimit){const li=document.createElement("li");li.innerHTML=`<button class="more" type="button">${esc(t("more"))}</button>`;li.firstChild.onclick=()=>{listLimit+=60;render(false,true)};list.append(li)}
   if(CONTRIBUTE.channel)list.append(sg);
   if(fit&&r.length)map.fitBounds(L.latLngBounds(r.slice(0,you?8:r.length).map(m=>[m.lat,m.lng]).concat(you?[[you.lat,you.lng]]:[])),{paddingTopLeft:[leftPad(),90],paddingBottomRight:[40,bottomPad()],maxZoom:15});
 }
 
 function popupHtml(m){
-  return `<div class="pop"><h3>${esc(m.name)}</h3><div class="sub">${esc(placeOf(m))}${you?" · "+fmtKm(km(you,m))+" away":""}</div>
-  <div class="acts"><a class="go" href="${dirUrl(m)}" target="_blank" rel="noopener">Directions</a><button class="sh" type="button" data-id="${m.id}">${SHARE}Share</button></div></div>`;
+  return `<div class="pop"><h3>${esc(m.name)}</h3><div class="sub">${esc(placeOf(m))}${you?" · "+fmtKm(km(you,m))+" "+t("away"):""}</div>
+  <div class="acts"><a class="go" href="${dirUrl(m)}" target="_blank" rel="noopener">${t("dirs")}</a><button class="sh" type="button" data-id="${m.id}">${SHARE}${t("share")}</button></div></div>`;
 }
 /* curved dashed route from you to the chosen masjid, with a distance chip, like a flight path */
 let route=null,routeChip=null;
@@ -361,11 +460,11 @@ function setYou(lat,lng,center){
 }
 function locate(){
   if(you&&watchId!=null){setSheet("half");render(true,true);return}
-  if(!navigator.geolocation){toast("Your browser can't share location. Long-press (or right-click) the map where you are.");return}
-  toast("Finding your location…",8000);let first=true;
+  if(!navigator.geolocation){toast(t("noGeo"));return}
+  toast(t("finding"),8000);let first=true;
   watchId=navigator.geolocation.watchPosition(p=>{setYou(p.coords.latitude,p.coords.longitude,first);if(first){$("toast").hidden=true;first=false}},
     err=>{watchId!=null&&navigator.geolocation.clearWatch(watchId);watchId=null;
-      toast(err.code===1?"Location is blocked. Allow it in browser settings, or long-press (or right-click) the map where you are.":"Couldn't get your location. Long-press (or right-click) the map where you are.",6000)},
+      toast(err.code===1?t("blocked"):t("noLoc"),6000)},
     {enableHighAccuracy:true,maximumAge:30000,timeout:15000});
 }
 $("nearBtn").onclick=locate;
@@ -383,8 +482,8 @@ map.on("popupopen",e=>{const b=e.popup.getElement().querySelector(".sh");if(!b)r
   b.onclick=async()=>{const m=masjids.find(x=>x.id===b.dataset.id);if(!m)return;
     const text=m.name+", "+placeOf(m);
     if(navigator.share){try{await navigator.share({title:m.name,text,url:viewUrl(m)})}catch(_){}return}
-    try{await navigator.clipboard.writeText(text+"\n"+viewUrl(m));toast("Location link copied")}catch(_){window.open(viewUrl(m),"_blank","noopener")}}});
-map.on("contextmenu",e=>{if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null}setYou(e.latlng.lat,e.latlng.lng,true);toast("Showing masjids nearest to this spot")});
+    try{await navigator.clipboard.writeText(text+"\n"+viewUrl(m));toast(t("copied"))}catch(_){window.open(viewUrl(m),"_blank","noopener")}}});
+map.on("contextmenu",e=>{if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null}setYou(e.latlng.lat,e.latlng.lng,true);toast(t("thisSpot"))});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&sheetState!=="closed")setSheet("closed")});
 addEventListener("resize",()=>{if(sheetState!=="closed")setSheet(sheetState)});
 
@@ -395,7 +494,7 @@ fetch("masjids.json").then(r=>r.json()).then(data=>{
     mk.on("click",()=>{if(selMk!==mk){liftSel(mk);mk.openPopup()}selId=m.id;drawRoute(m)});
     markers.set(m.id,mk)}
   render();
-}).catch(()=>toast("Couldn't load the masjid list. Check your connection and reload.",10000));
+}).catch(()=>toast(t("loadFail"),10000));
 
 
 /* ---- Suggest a masjid: builds a request the owner checks; nothing is added to the map ---- */
@@ -404,31 +503,31 @@ fetch("masjids.json").then(r=>r.json()).then(data=>{
 /* requests go by email to the finder's inbox through FormSubmit (no server or key; the inbox confirms once) */
 const CONTRIBUTE={channel:"email",to:"salafimasjidfinder@gmail.com"};
 const sgLoc={lat:null,lng:null};
-function openSuggest(pre){$("suggest").hidden=false;$("sgErr").hidden=true;if(typeof pre==="string"&&pre&&!$("sgName").value)$("sgName").value=pre;
-  $("sgFine").textContent=CONTRIBUTE.channel?"Your request is sent privately for checking.":"";
+function openSuggest(pre){$("suggest").hidden=false;if(!/…$/.test($("sgLoc").textContent))showLoc(); /* refresh in the current language unless a GPS fix is in progress */$("sgErr").hidden=true;if(typeof pre==="string"&&pre&&!$("sgName").value)$("sgName").value=pre;
+  $("sgFine").textContent=CONTRIBUTE.channel?t("sgFine"):"";
   setTimeout(()=>$("sgName").focus(),50)}
 function closeSuggest(){$("suggest").hidden=true}
-function showLoc(){const ok=sgLoc.lat!=null;$("sgLoc").className="locstate"+(ok?" ok":"");$("sgLoc").textContent=ok?`✓ Location added (${sgLoc.lat.toFixed(5)}, ${sgLoc.lng.toFixed(5)})`:"No location added yet"}
+function showLoc(){const ok=sgLoc.lat!=null;$("sgLoc").className="locstate"+(ok?" ok":"");$("sgLoc").textContent=ok?`${t("sgLocOk")} (${sgLoc.lat.toFixed(5)}, ${sgLoc.lng.toFixed(5)})`:t("sgNoLoc")}
 $("sgClose").onclick=closeSuggest;
 $("addBtn").onclick=openSuggest;$("addBtn").hidden=!CONTRIBUTE.channel;
 $("suggest").addEventListener("click",e=>{if(e.target.id==="suggest")closeSuggest()});
-$("sgHere").onclick=()=>{if(!navigator.geolocation){$("sgLoc").textContent="Your browser can't share location. Paste a Google Maps link instead.";return}
-  $("sgLoc").className="locstate";$("sgLoc").textContent="Getting your location…";
+$("sgHere").onclick=()=>{if(!navigator.geolocation){$("sgLoc").textContent=t("sgNoGeo");return}
+  $("sgLoc").className="locstate";$("sgLoc").textContent=t("sgGetting");
   navigator.geolocation.getCurrentPosition(p=>{sgLoc.lat=+p.coords.latitude.toFixed(6);sgLoc.lng=+p.coords.longitude.toFixed(6);showLoc()},
-    ()=>{$("sgLoc").textContent="Couldn't get your location. Paste a Google Maps link instead."},{enableHighAccuracy:true,timeout:15000})};
+    ()=>{$("sgLoc").textContent=t("sgGeoFail")},{enableHighAccuracy:true,timeout:15000})};
 $("sgForm").addEventListener("submit",e=>{e.preventDefault();
   const name=$("sgName").value.trim(),area=$("sgArea").value.trim(),link=$("sgLink").value.trim();
-  const miss=[!name&&"the masjid name",!area&&"the area",sgLoc.lat==null&&!link&&"the location (use your location or paste a Google Maps link)"].filter(Boolean);
-  if(miss.length){$("sgErr").textContent="Please add "+miss.join(", ").replace(/, ([^,]*)$/," and $1")+".";$("sgErr").hidden=false;return}
+  const miss=[!name&&t("needName"),!area&&t("needArea"),sgLoc.lat==null&&!link&&t("needLoc")].filter(Boolean);
+  if(miss.length){$("sgErr").textContent=t("pleaseAdd")(miss);$("sgErr").hidden=false;return}
   const spot=sgLoc.lat!=null?"https://www.google.com/maps?q="+sgLoc.lat+","+sgLoc.lng:"";
-  const fail=()=>{$("sgErr").textContent="Couldn't send. Check your connection and try again.";$("sgErr").hidden=false};
-  $("sgSend").disabled=true;$("sgSend").textContent="Sending…";
+  const fail=()=>{$("sgErr").textContent=t("sendFail");$("sgErr").hidden=false};
+  $("sgSend").disabled=true;$("sgSend").textContent=t("sending");
   fetch("https://formsubmit.co/ajax/"+CONTRIBUTE.to,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},
-    body:JSON.stringify({_subject:"Masjid suggestion: "+name,_template:"table",_captcha:"false","Masjid name":name,"Area / town":area,"Spot on map":spot||"-","Google Maps link":link||"-"})})
+    body:JSON.stringify({_subject:"Masjid suggestion: "+name,_template:"table",_captcha:"false","Masjid name":name,"Area / town":area,"Spot on map":spot||"-","Google Maps link":link||"-","Language":lang==="ml"?"Malayalam":"English"})})
   .then(r=>r.json()).then(j=>{if(String(j.success)!=="true")throw 0;
-      closeSuggest();$("sgForm").reset();sgLoc.lat=sgLoc.lng=null;showLoc();toast("Thank you! Your suggestion was sent for checking.",5000)})
+      closeSuggest();$("sgForm").reset();sgLoc.lat=sgLoc.lng=null;showLoc();toast(t("thanks"),5000)})
   .catch(fail)
-  .finally(()=>{$("sgSend").disabled=false;$("sgSend").textContent="Send request"});
+  .finally(()=>{$("sgSend").disabled=false;$("sgSend").textContent=t("send")});
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("suggest").hidden)closeSuggest()});
 
